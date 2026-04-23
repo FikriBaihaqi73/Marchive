@@ -17,8 +17,23 @@ if (!work) return Astro.redirect('/404');
 
 <Layout>
   <main class="detail-page container">
+    <script>
+      document.getElementById('back-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const referrer = document.referrer;
+        // Jika kembali dari halaman baca (chapter), arahkan ke /works agar tidak looping
+        if (referrer.includes(window.location.pathname + '/')) {
+          window.location.href = '/works';
+        } else if (referrer.includes(window.location.origin)) {
+          history.back();
+        } else {
+          window.location.href = '/works';
+        }
+      });
+    </script>
+
     <div class="navigation-top">
-      <a href="#" onclick="history.back(); return false;" class="back-link">&larr; BACK</a>
+      <a href="#" id="back-btn" class="back-link">&larr; BACK</a>
       <div class="meta-tag">{work.category}</div>
     </div>
 
@@ -45,11 +60,11 @@ if (!work) return Astro.redirect('/404');
               <h2>CHAPTERS</h2>
               <div class="chapters-list">
                 {work.data.chapters?.map((chapter) => (
-                  <div class="chapter-card">
+                  <a href={`/works/${work.id}/${chapter.id}`} class="chapter-card">
                     <span class="ch-num">{chapter.id.toUpperCase()}</span>
                     <h3>{chapter.title}</h3>
-                    <button class="read-btn">READ &rarr;</button>
-                  </div>
+                    <span class="read-btn">READ &rarr;</span>
+                  </a>
                 ))}
               </div>
             </section>
@@ -171,11 +186,15 @@ if (!work) return Astro.redirect('/404');
     align-items: center;
     justify-content: space-between;
     transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    background: rgba(255, 255, 255, 0.02);
   }
 
   .chapter-card:hover {
     border-color: var(--accent-color);
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(197, 160, 89, 0.05);
+    transform: translateX(10px);
   }
 
   .ch-num {

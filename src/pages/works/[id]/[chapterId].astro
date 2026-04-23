@@ -1,0 +1,271 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { works, type Work } from '../../../data/works';
+
+export function getStaticPaths() {
+  const chapterPaths: any[] = [];
+  
+  works.forEach((work: Work) => {
+    if (work.layout === 'book' && work.data.chapters) {
+      work.data.chapters.forEach((chapter) => {
+        chapterPaths.push({
+          params: { id: work.id, chapterId: chapter.id },
+          props: { work, chapter },
+        });
+      });
+    }
+  });
+
+  return chapterPaths;
+}
+
+const { work, chapter } = Astro.props as { work: Work, chapter: any };
+
+// Navigasi
+const chapters = work.data.chapters || [];
+const chapterIndex = chapters.findIndex((c: any) => c.id === chapter.id) ?? -1;
+const prevChapter = chapters[chapterIndex - 1];
+const nextChapter = chapters[chapterIndex + 1];
+---
+
+<Layout title={`${work.title} - ${chapter.title}`}>
+  <!-- Special Reader Layout to override global nav if needed via CSS -->
+  <div class="reader-mode-wrapper">
+    
+    <!-- Ultra Minimalist Top Bar -->
+    <nav class="minimal-nav">
+      <div class="container nav-content">
+        <a href={`/works/${work.id}`} class="back-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>BACK</span>
+        </a>
+        <div class="nav-info">
+          <span class="btit">{work.title}</span>
+          <span class="divider">/</span>
+          <span class="ctit">{chapter.title}</span>
+        </div>
+        <div class="nav-progress-outer">
+          <div class="nav-progress-inner" id="scroll-bar"></div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="reader-main container">
+      <article class="reader-article">
+        <header class="reader-header">
+          <span class="chapter-label">{chapter.id.toUpperCase()}</span>
+          <h1>{chapter.title}</h1>
+        </header>
+
+        <section class="reader-body serif">
+          {chapter.content}
+        </section>
+
+        <section class="reader-footer-nav">
+          {nextChapter ? (
+            <div class="next-up">
+              <span class="next-label">UP NEXT</span>
+              <a href={`/works/${work.id}/${nextChapter.id}`} class="next-link">
+                <h2>{nextChapter.title}</h2>
+                <div class="next-arrow">
+                  CONTINUE READING
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </a>
+            </div>
+          ) : (
+            <div class="end-book">
+              <p>You've finished the available chapters.</p>
+              <a href="/works" class="btn-archive">BACK TO ARCHIVE</a>
+            </div>
+          )}
+          
+          <div class="bottom-utility">
+            {prevChapter && <a href={`/works/${work.id}/${prevChapter.id}`}>&larr; Previous Chapter</a>}
+          </div>
+        </section>
+      </article>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  /* Local Overrides to hide global elements for focus mode */
+  :global(nav:not(.minimal-nav)),
+  :global(footer) {
+    display: none !important;
+  }
+
+  .reader-mode-wrapper {
+    background: #050505;
+    min-height: 100vh;
+    color: #ccc;
+    font-size: 18px;
+  }
+
+  .minimal-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #050505;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    z-index: 9999;
+  }
+
+  .nav-content {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+  }
+
+  .nav-info {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: flex;
+    gap: 10px;
+    opacity: 0.4;
+  }
+
+  .ctit { color: var(--accent-color); opacity: 1; font-weight: 700; }
+
+  .nav-progress-outer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .nav-progress-inner {
+    height: 100%;
+    background: var(--accent-color);
+    width: 0%;
+  }
+
+  /* Main Content */
+  .reader-main {
+    max-width: 680px !important;
+    padding-top: 150px;
+    padding-bottom: 100px;
+  }
+
+  .reader-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  .chapter-label {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    letter-spacing: 0.4em;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 3rem;
+    line-height: 1.2;
+    color: #fff;
+    font-family: var(--font-serif);
+  }
+
+  .reader-body {
+    font-size: 1.25rem;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: pre-line;
+    margin-bottom: 100px;
+  }
+
+  .serif {
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Footer Nav Area */
+  .reader-footer-nav {
+    padding-top: 80px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .next-up {
+    text-align: center;
+  }
+
+  .next-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    opacity: 0.4;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .next-link h2 {
+    font-size: 2rem;
+    font-family: var(--font-serif);
+    color: var(--accent-color);
+    margin-bottom: 20px;
+  }
+
+  .next-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
+  .btn-archive {
+    display: inline-block;
+    padding: 12px 30px;
+    background: var(--accent-color);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-top: 20px;
+  }
+
+  .bottom-utility {
+    margin-top: 100px;
+    display: flex;
+    justify-content: center;
+    font-size: 0.8rem;
+    opacity: 0.3;
+  }
+
+  @media (max-width: 600px) {
+    .nav-info { display: none; }
+    h1 { font-size: 2rem; }
+    .reader-body { font-size: 1.1rem; }
+  }
+</style>
+
+<script>
+  function handleScroll() {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    const bar = document.getElementById('scroll-bar');
+    if (bar) bar.style.width = scrolled + "%";
+  }
+
+  window.addEventListener('scroll', handleScroll);
+</script>

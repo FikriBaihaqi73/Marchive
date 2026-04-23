@@ -8,7 +8,7 @@ export interface Work {
   data: {
     synopsis?: string;
     content?: string;
-    chapters?: { title: string; id: string }[];
+    chapters?: { title: string; id: string; content: string }[];
   };
   featured?: boolean;
 }
@@ -46,9 +46,21 @@ export const works: Work[] = [
     data: {
       synopsis: "Kumpulan fragmen kehidupan yang terserak, mencoba menemukan makna di balik keretakan.",
       chapters: [
-        { title: 'Bagian I: Retakan', id: 'c1' },
-        { title: 'Bagian II: Cahaya', id: 'c2' },
-        { title: 'Bagian III: Rekonstruksi', id: 'c3' }
+        { 
+          title: 'Bagian I: Retakan', 
+          id: 'c1',
+          content: "Segalanya bermula dari sebuah retakan kecil. Begitu tipis, hampir tak terlihat oleh mata telanjang. Namun di balik keheningan malam, retakan itu berbisik, merayap perlahan melintasi fondasi yang dulu kita anggap abadi.\n\nAku berdiri di sana, memandang dinding yang mulai menyerah pada gravitasi. Kita sering lupa bahwa kehancuran jarang terjadi dalam satu ledakan besar. Seringkali, ia adalah akumulasi dari senyap yang terlalu lama disimpan."
+        },
+        { 
+          title: 'Bagian II: Cahaya', 
+          id: 'c2',
+          content: "Cahaya menembus celah-celah itu. Indah, sekaligus menyakitkan. Ia menerangi debu-debu yang selama ini bersembunyi di sudut gelap ingatan kita. Di dalam keretakan, ternyata ada ruang untuk tumbuh.\n\nKita belajar bahwa untuk melihat bintang, langit harus terbelah. Dan untuk melihat kebenaran, hati pun kadang harus melalui hal yang sama."
+        },
+        { 
+          title: 'Bagian III: Rekonstruksi', 
+          id: 'c3',
+          content: "Kini saatnya menyusun kembali. Bukan untuk menjadi utuh seperti semula, karena bekas luka itu akan selalu ada. Namun untuk menjadi sesuatu yang baru—sesuatu yang lebih kuat karena pernah hancur.\n\nSetiap kepingan yang kita ambil memiliki ceritanya sendiri. Kita tidak sedang memperbaiki masa lalu, kita sedang membangun masa depan yang lebih jujur."
+        }
       ]
     }
   },
