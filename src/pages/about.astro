@@ -1,0 +1,191 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="about-page container">
+    <header class="about-header">
+      <div class="section-num">04</div>
+      <h1 class="fade-in">ABOUT MARCHIVE</h1>
+    </header>
+
+    <section class="about-content">
+      <div class="intro-grid">
+        <div class="main-text fade-in">
+          <p class="large-text">Marchive adalah ruang arsip digital tempat beragam karya dikumpulkan, disusun, dan dibagikan.</p>
+          <p>Lahir dari keinginan untuk mengabadikan setiap jejak pemikiran, Marchive menjadi rumah bagi tulisan, puisi, hingga eksplorasi desain. Di sini, setiap karya bukan sekadar data, melainkan bagian dari perjalanan panjang dalam berpikir dan berkarya.</p>
+          
+          <div class="philosophy-box">
+            <h3>PHILOSOPHY</h3>
+            <p>“We don't just create. We preserve what matters.”</p>
+          </div>
+        </div>
+        <div class="image-side fade-in">
+          <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=1000" alt="Archway Architecture" class="main-img" />
+        </div>
+      </div>
+
+      <div class="details-grid fade-in">
+        <div class="detail-item">
+          <span>01</span>
+          <h4>COLLECT</h4>
+          <p>Menghimpun fragmen ide yang berserakan menjadi satu kesatuan yang kohesif.</p>
+        </div>
+        <div class="detail-item">
+          <span>02</span>
+          <h4>CURATE</h4>
+          <p>Memilih dan memilah setiap elemen untuk memastikan kualitas dan pesan yang disampaikan.</p>
+        </div>
+        <div class="detail-item">
+          <span>03</span>
+          <h4>ARCHIVE</h4>
+          <p>Mengabadikan setiap karya agar tetap relevan dan dapat dinikmati melampaui waktu.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="branding-footer fade-in">
+      <h2 class="footer-logo">MARCHIVE</h2>
+      <div class="footer-meta">
+        <span>EST. 2024</span>
+        <span class="dot"></span>
+        <span>DIGITAL ARCHIVE</span>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .about-page {
+    padding-top: 180px;
+    padding-bottom: 150px;
+  }
+
+  .about-header {
+    margin-bottom: 100px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 100px;
+    align-items: center;
+    margin-bottom: 150px;
+  }
+
+  .large-text {
+    font-size: 2rem;
+    font-family: var(--font-serif);
+    line-height: 1.4;
+    margin-bottom: 40px;
+    color: var(--accent-color);
+  }
+
+  .main-text p:not(.large-text) {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    line-height: 1.8;
+    max-width: 500px;
+  }
+
+  .philosophy-box {
+    margin-top: 60px;
+    border-left: 2px solid var(--accent-color);
+    padding-left: 30px;
+  }
+
+  .philosophy-box h3 {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 15px;
+    opacity: 0.6;
+  }
+
+  .philosophy-box p {
+    font-style: italic;
+    font-size: 1.2rem !important;
+  }
+
+  .main-img {
+    width: 100%;
+    height: 700px;
+    object-fit: cover;
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Details Grid */
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 60px;
+    margin-bottom: 150px;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 60px;
+  }
+
+  .detail-item span {
+    font-size: 0.7rem;
+    color: var(--accent-color);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .detail-item h4 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    letter-spacing: 0.1em;
+  }
+
+  .detail-item p {
+    font-size: 0.9rem;
+    opacity: 0.6;
+    line-height: 1.6;
+  }
+
+  /* Branding Footer */
+  .branding-footer {
+    text-align: center;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 100px;
+  }
+
+  .footer-logo {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    letter-spacing: 0.2em;
+  }
+
+  .footer-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+  }
+
+  .dot {
+    width: 4px;
+    height: 4px;
+    background: var(--accent-color);
+    border-radius: 50%;
+  }
+
+  @media (max-width: 992px) {
+    .intro-grid, .details-grid {
+      grid-template-columns: 1fr;
+      gap: 50px;
+    }
+    h1 { font-size: 3rem; }
+    .footer-logo { font-size: 2.5rem; }
+    .main-img { height: 400px; }
+  }
+</style>

@@ -1,0 +1,303 @@
+---
+import { works } from '../data/works';
+const featuredWorks = works.slice(0, 3);
+---
+
+<section class="hero-hybrid container">
+  <div class="hero-grid">
+    
+    <!-- Static Part: Left Side -->
+    <div class="hero-static">
+      <div class="section-num">01</div>
+      <h1 class="fade-in">MARCHIVE</h1>
+      <p class="fade-in subtitle">A collection of thoughts, stories, and creations.</p>
+    </div>
+
+    <!-- Sliding Part: Right Side -->
+    <div class="hero-slider-side">
+      <div class="slides-inner" id="hero-slides">
+        {featuredWorks.map((work, index) => (
+          <div class={`hero-slide ${index === 0 ? 'active' : ''}`} data-index={index}>
+            <div class="slide-content-wrap">
+              <a href={`/works/${work.id}`} class="image-link-wrap">
+                <div class="image-box">
+                  <img src={work.cover} alt={work.title} />
+                </div>
+              </a>
+              <div class="slide-caption">
+                <!-- Progress Indicators - Right above the category -->
+                <div class="slide-progress">
+                  {featuredWorks.map((_, i) => (
+                    <span class={`dot-line ${i === index ? 'active' : ''}`} data-index={i}></span>
+                  ))}
+                </div>
+                <span class="cat">{work.category}</span>
+                <h2 class="work-title">{work.title}</h2>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <!-- Persistent Arrow Navigation -->
+        <div class="slider-controls-ui">
+          <div class="arrows-wrap">
+            <button id="prev-hero" class="nav-btn-new" aria-label="Previous">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button id="next-hero" class="nav-btn-new" aria-label="Next">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .hero-hybrid {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 100px;
+    padding-bottom: 50px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 6rem;
+    line-height: 1;
+    margin-bottom: 30px;
+    letter-spacing: 0.1em;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    max-width: 320px;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.6;
+  }
+
+  .hero-slider-side {
+    position: relative;
+    width: 100%;
+  }
+
+  .slides-inner {
+    position: relative;
+    height: 550px;
+  }
+
+  .hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hero-slide.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .slide-content-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .image-link-wrap {
+    display: block;
+    width: 90%;
+    margin-left: auto;
+    cursor: pointer;
+  }
+
+  .image-box {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #000;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.5s ease;
+    filter: brightness(0.7);
+  }
+
+  .hero-slide.active img {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+
+  .slide-caption {
+    margin-top: 25px;
+    width: 90%;
+    margin-left: auto;
+    text-align: left;
+  }
+
+  .slide-progress {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .cat {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .work-title {
+    font-size: 1.5rem;
+    font-family: var(--font-serif);
+    color: var(--text-color);
+  }
+
+  /* UI CONTROLS */
+  .slider-controls-ui {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 90%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .arrows-wrap {
+    position: absolute;
+    top: 33%; 
+    transform: translateY(-50%);
+    left: -28px;
+    right: -28px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .nav-btn-new {
+    pointer-events: auto;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.3;
+    transition: all 0.3s ease;
+  }
+
+  .nav-btn-new svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav-btn-new:hover {
+    opacity: 1;
+    color: var(--accent-color);
+    transform: scale(1.1);
+  }
+
+  .dot-line {
+    width: 15px;
+    height: 1px;
+    background: #fff;
+    opacity: 0.15;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .dot-line.active {
+    opacity: 1;
+    background: var(--accent-color);
+    width: 25px;
+  }
+
+  @media (max-width: 992px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    h1 { font-size: 3.5rem; }
+    .slides-inner { height: auto; min-height: 400px; }
+    .slider-controls-ui { width: 100%; }
+    .arrows-wrap { top: 30%; left: 0; right: 0; }
+  }
+</style>
+
+<script>
+  function initHybridSlider() {
+    const slides = document.querySelectorAll('.hero-slide');
+    const prevBtn = document.getElementById('prev-hero');
+    const nextBtn = document.getElementById('next-hero');
+    let current = 0;
+
+    if (!slides.length) return;
+
+    function showSlide(index: number) {
+      if (index >= slides.length) index = 0;
+      if (index < 0) index = slides.length - 1;
+
+      slides.forEach((slide, i) => {
+        slide.classList.remove('active');
+        // Synchronize all dot-lines across all slide captions
+        const allDotsAtThisIndex = document.querySelectorAll(`.dot-line[data-index="${i}"]`);
+        allDotsAtThisIndex.forEach(dot => {
+          if (i === index) dot.classList.add('active');
+          else dot.classList.remove('active');
+        });
+      });
+
+      slides[index].classList.add('active');
+      current = index;
+    }
+
+    prevBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showSlide(current - 1);
+    });
+    
+    nextBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showSlide(current + 1);
+    });
+
+    // Handle clicks on all possible dot positions
+    document.querySelectorAll('.dot-line').forEach((dot) => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt((e.currentTarget as HTMLElement).dataset.index || '0');
+        showSlide(index);
+      });
+    });
+
+    setInterval(() => showSlide(current + 1), 7000);
+  }
+
+  initHybridSlider();
+</script>

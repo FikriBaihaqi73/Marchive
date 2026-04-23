@@ -1,11 +1,60 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Hero from '../components/Hero.astro';
+import LatestWorks from '../components/LatestWorks.astro';
+import About from '../components/About.astro';
 ---
 
 <Layout>
-	<Welcome />
+	<main>
+    <!-- Sidebar decoration -->
+    <div class="sidebar-text">SCROLL TO DISCOVER</div>
+    <div class="sidebar-socials">
+      <a href="#">INSTAGRAM</a>
+      <a href="#">TWITTER</a>
+      <a href="#">EMAIL</a>
+    </div>
+
+    <Hero />
+    <LatestWorks />
+
+	</main>
 </Layout>
+
+<style>
+  main {
+    padding-top: 100px;
+    position: relative;
+  }
+
+  /* Sidebar Decorations */
+  .sidebar-text {
+    position: fixed;
+    left: 40px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: left;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    opacity: 0.5;
+    z-index: 10;
+  }
+
+  .sidebar-socials {
+    position: fixed;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+    z-index: 10;
+  }
+
+  @media (max-width: 992px) {
+    .sidebar-text, .sidebar-socials { display: none; }
+  }
+</style>

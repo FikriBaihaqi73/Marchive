@@ -1,0 +1,86 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GalleryItem from '../../components/GalleryItem.astro';
+import { works } from '../../data/works';
+---
+
+<Layout>
+  <main class="works-page container">
+    <header class="page-header">
+      <div class="section-num">ARCHIVE</div>
+      <h1>ALL WORKS</h1>
+      <p class="subtitle text-muted">Exploration of thoughts, literature, and visual arts.</p>
+    </header>
+
+    <div class="filter-bar">
+      <button class="filter-item active">ALL</button>
+      <button class="filter-item">NOVEL</button>
+      <button class="filter-item">PUISI</button>
+      <button class="filter-item">CERPEN</button>
+      <button class="filter-item">ESAI</button>
+      <button class="filter-item">DESAIN</button>
+      <button class="filter-item">CATATAN</button>
+    </div>
+
+    <div class="gallery-grid-new">
+      {works.map((work) => (
+        <GalleryItem {...work} />
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .works-page {
+    padding-top: 180px;
+    padding-bottom: 120px;
+  }
+
+  .page-header {
+    margin-bottom: 80px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 5rem;
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 80px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 20px;
+  }
+
+  .filter-item {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+
+  .filter-item.active, .filter-item:hover {
+    opacity: 1;
+    color: var(--accent-color);
+  }
+
+  .gallery-grid-new {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+  }
+
+  @media (max-width: 992px) {
+    h1 { font-size: 3rem; }
+    .filter-bar { gap: 20px; overflow-x: auto; justify-content: flex-start; }
+  }
+</style>

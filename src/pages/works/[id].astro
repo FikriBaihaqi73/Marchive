@@ -1,0 +1,226 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { works } from '../../data/works';
+
+export function getStaticPaths() {
+  return works.map((work) => ({
+    params: { id: work.id },
+    props: { work },
+  }));
+}
+
+const { id } = Astro.params;
+const work = works.find(w => w.id === id);
+
+if (!work) return Astro.redirect('/404');
+---
+
+<Layout>
+  <main class="detail-page container">
+    <div class="navigation-top">
+      <a href="#" onclick="history.back(); return false;" class="back-link">&larr; BACK</a>
+      <div class="meta-tag">{work.category}</div>
+    </div>
+
+    <div class="detail-grid">
+      <!-- Title and Main Info -->
+      <header class="detail-header">
+        <h1 class="fade-in">{work.title}</h1>
+        <div class="work-date fade-in">{work.date}</div>
+      </header>
+
+      <div class="visual-pane fade-in">
+        <img src={work.cover} alt={work.title} class="main-cover" />
+      </div>
+
+      <div class="content-pane fade-in">
+        {work.layout === 'book' ? (
+          <div class="content-book">
+            <section class="synopsis">
+              <h2>SYNOPSIS</h2>
+              <p>{work.data.synopsis}</p>
+            </section>
+            
+            <section class="chapters-grid">
+              <h2>CHAPTERS</h2>
+              <div class="chapters-list">
+                {work.data.chapters?.map((chapter) => (
+                  <div class="chapter-card">
+                    <span class="ch-num">{chapter.id.toUpperCase()}</span>
+                    <h3>{chapter.title}</h3>
+                    <button class="read-btn">READ &rarr;</button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        ) : (
+          <div class="content-standard">
+            <div class="main-body">
+              {work.data.content}
+            </div>
+            {work.category === 'Puisi' && <div class="poetry-end"></div>}
+          </div>
+        )}
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .detail-page {
+    padding-top: 150px;
+    padding-bottom: 150px;
+  }
+
+  .navigation-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 60px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 20px;
+  }
+
+  .back-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    opacity: 0.6;
+  }
+
+  .back-link:hover {
+    opacity: 1;
+    color: var(--accent-color);
+  }
+
+  .meta-tag {
+    font-size: 0.75rem;
+    background: var(--accent-color);
+    color: #000;
+    padding: 6px 16px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: inline-block;
+    line-height: 1;
+  }
+
+  .detail-header {
+    grid-column: 1 / -1;
+    margin-bottom: 80px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 5rem;
+    margin-bottom: 10px;
+  }
+
+  .work-date {
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    opacity: 0.5;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .main-cover {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Book Layout */
+  .synopsis {
+    margin-bottom: 60px;
+  }
+
+  .synopsis h2, .chapters-grid h2 {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--accent-color);
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 10px;
+    width: fit-content;
+  }
+
+  .synopsis p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    opacity: 0.8;
+  }
+
+  .chapters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .chapter-card {
+    padding: 30px;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+  }
+
+  .chapter-card:hover {
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .ch-num {
+    font-size: 0.7rem;
+    opacity: 0.4;
+    font-weight: 800;
+  }
+
+  .chapter-card h3 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 1rem;
+    flex-grow: 1;
+    margin-left: 40px;
+  }
+
+  .read-btn {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
+  /* Standard Content Layout */
+  .main-body {
+    font-size: 1.25rem;
+    line-height: 2;
+    white-space: pre-line;
+    opacity: 0.9;
+    font-style: italic;
+  }
+
+  .poetry-end {
+    width: 40px;
+    height: 1px;
+    background: var(--accent-color);
+    margin-top: 60px;
+  }
+
+  @media (max-width: 992px) {
+    .detail-grid {
+      grid-template-columns: 1fr;
+    }
+    h1 {
+      font-size: 3rem;
+    }
+  }
+</style>
