@@ -1,0 +1,180 @@
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 10000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animasi Merusak Pita */
+.tape-item.snapped {
+  transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  opacity: 0 !important;
+}
+
+.tape-item.snapped[data-index="0"] { transform: translate(-100vw, -100vh) rotate(-45deg) !important; }
+.tape-item.snapped[data-index="1"] { transform: translate(100vw, -50vh) rotate(45deg) !important; }
+.tape-item.snapped[data-index="2"] { transform: translate(-100vw, 50vh) rotate(-60deg) !important; }
+.tape-item.snapped[data-index="3"] { transform: translate(100vw, 100vh) rotate(30deg) !important; }
+.tape-item.snapped[data-index="4"] { transform: translate(-120vw, 0) rotate(-10deg) !important; }
+.tape-item.snapped[data-index="5"] { transform: translate(120vw, 20vh) rotate(20deg) !important; }
+.tape-item.snapped[data-index="6"] { transform: translate(0, -150vh) rotate(90deg) !important; }
+.tape-item.snapped[data-index="7"] { transform: translate(0, 150vh) rotate(-90deg) !important; }
+
+.preloader.completed {
+  background: transparent;
+  pointer-events: none;
+  transition: background 0.5s ease;
+}
+
+.preloader-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tape {
+  position: absolute;
+  left: -100vw;
+  color: #000;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+  white-space: nowrap;
+  border-top: 2px solid rgba(0,0,0,0.1);
+  border-bottom: 2px solid rgba(0,0,0,0.1);
+  pointer-events: none;
+}
+
+.tape-inner {
+  display: flex;
+  width: max-content;
+  animation: scrollText linear infinite;
+}
+
+.tape-inner.reversed { animation-name: scrollTextReverse; }
+.tape-inner:not(.reversed) { animation-name: scrollText; }
+
+@keyframes scrollText {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes scrollTextReverse {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+/* UI Styling */
+.center-ui {
+  z-index: 1000;
+  text-align: center;
+  position: relative;
+}
+
+.status-box {
+  background: rgba(0,0,0,0.85);
+  padding: 30px 60px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  transition: all 0.5s ease;
+}
+
+.status-box.fade-out {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.loading-bar-wrap {
+  width: 200px;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  margin: 0 auto 20px;
+  overflow: hidden;
+}
+
+.loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--accent-color);
+  animation: loadProgress 2s ease-in-out infinite;
+}
+
+@keyframes loadProgress {
+  0% { width: 0; transform: translateX(-100%); }
+  50% { width: 100%; transform: translateX(0); }
+  100% { width: 0; transform: translateX(100%); }
+}
+
+.status-text {
+  color: #fff;
+  font-size: 0.7rem;
+  letter-spacing: 0.6em;
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* Enter Button */
+.enter-archive-btn {
+  background: var(--accent-color);
+  color: #000;
+  border: none;
+  padding: 25px 60px;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 0 50px rgba(197, 160, 89, 0.4);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap;
+}
+
+.enter-archive-btn.hidden {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
+  pointer-events: none;
+}
+
+.enter-archive-btn:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  background: #fff;
+  box-shadow: 0 0 70px rgba(255, 255, 255, 0.6);
+}
+
+.btn-text {
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.btn-subtext {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .tape { font-size: 0.7rem !important; }
+  .status-box { padding: 20px 30px; width: 280px; }
+  .enter-archive-btn { padding: 20px 40px; }
+}

@@ -1,6 +1,7 @@
 ---
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import Preloader from '../components/Preloader.astro';
 ---
 
 <!doctype html>
@@ -20,6 +21,7 @@ import Footer from '../components/Footer.astro';
 		</style>
 	</head>
 	<body>
+		<Preloader />
 		<Navbar />
 		<slot />
 		<Footer />

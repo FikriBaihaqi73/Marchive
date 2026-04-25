@@ -1,0 +1,59 @@
+---
+import { tapes } from '../data/preloader';
+
+const REPEAT_COUNT = 15;
+---
+
+<div id="preloader" class="preloader" style="display: none;">
+  {/* Inline Script Cepat untuk mencegah kilatan pita */}
+  <script is:inline>
+    (function() {
+      if (!sessionStorage.getItem('marchive_visited')) {
+        document.getElementById('preloader').style.display = 'flex';
+      }
+    })();
+  </script>
+
+  <div class="preloader-content" id="tapes-container">
+    {tapes.map((tape, index) => (
+      <div 
+        class={`tape tape-item`} 
+        data-index={index}
+        style={`
+          top: ${tape.top}; 
+          transform: rotate(${tape.rotate}); 
+          background: ${tape.color || 'var(--accent-color)'};
+          z-index: ${5 + index};
+          opacity: ${tape.opacity || 1};
+          height: ${tape.height || '50px'};
+          width: ${tape.width || '400vw'};
+        `}
+      >
+        <div class={`tape-inner ${tape.reverse ? 'reversed' : ''}`} style={`animation-duration: ${tape.speed}`}>
+          <span>{tape.text.repeat(REPEAT_COUNT)}</span>
+          <span>{tape.text.repeat(REPEAT_COUNT)}</span>
+        </div>
+      </div>
+    ))}
+    
+    <div class="center-ui">
+      <div id="loading-box" class="status-box">
+        <div class="loading-bar-wrap">
+          <div class="loading-bar-fill"></div>
+        </div>
+        <h2 class="status-text">INITIALIZING ARCHIVE...</h2>
+      </div>
+
+      <button id="enter-btn" class="enter-archive-btn hidden">
+        <span class="btn-text">ENTER ARCHIVE</span>
+        <span class="btn-subtext">Click to break the barrier</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @import "../styles/preloader.css";
+</style>
+
+<script src="../scripts/preloader.ts"></script>
