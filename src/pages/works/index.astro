@@ -12,14 +12,31 @@ import { works } from '../../data/works';
       <p class="subtitle text-muted">Exploration of thoughts, literature, and visual arts.</p>
     </header>
 
-    <div class="filter-bar">
-      <button class="filter-item active">ALL</button>
-      <button class="filter-item">NOVEL</button>
-      <button class="filter-item">PUISI</button>
-      <button class="filter-item">CERPEN</button>
-      <button class="filter-item">ESAI</button>
-      <button class="filter-item">DESAIN</button>
-      <button class="filter-item">CATATAN</button>
+    <!-- Desktop Filter Bar -->
+    <div class="filter-bar-desktop">
+      {['ALL', 'NOVEL', 'PUISI', 'CERPEN', 'ESAI', 'DESAIN', 'CATATAN'].map(cat => (
+        <button class={`filter-item ${cat === 'ALL' ? 'active' : ''}`} data-category={cat}>{cat}</button>
+      ))}
+    </div>
+
+    <!-- Mobile Floating Filter -->
+    <div class="mobile-filter-wrapper">
+      <button id="mobile-filter-trigger" class="filter-trigger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+        <span>FILTER ARCHIVE</span>
+      </button>
+      
+      <div id="mobile-filter-menu" class="floating-filter-menu">
+        <div class="menu-header">
+          <span>SELECT CATEGORY</span>
+          <button id="close-filter">&times;</button>
+        </div>
+        <div class="filter-options">
+          {['ALL', 'NOVEL', 'PUISI', 'CERPEN', 'ESAI', 'DESAIN', 'CATATAN'].map(cat => (
+            <button class="mobile-opt" data-category={cat}>{cat}</button>
+          ))}
+        </div>
+      </div>
     </div>
 
     <div class="gallery-grid-new">
@@ -29,6 +46,72 @@ import { works } from '../../data/works';
     </div>
   </main>
 </Layout>
+
+<script>
+  function initWorksFilters() {
+    const trigger = document.getElementById('mobile-filter-trigger');
+    const menu = document.getElementById('mobile-filter-menu');
+    const closeBtn = document.getElementById('close-filter');
+    const opts = document.querySelectorAll('.mobile-opt');
+    const desktopBtns = document.querySelectorAll('.filter-item');
+    const galleryItems = document.querySelectorAll('.gallery-item-new');
+
+    function applyFilter(cat: string, updateUrl = true) {
+      const lowerCat = cat.toLowerCase();
+      
+      // Update UI
+      [...opts, ...desktopBtns].forEach(btn => {
+        if ((btn as HTMLElement).dataset.category === cat) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Filter Gallery
+      galleryItems.forEach(item => {
+        const itemCat = (item as HTMLElement).dataset.category;
+        if (lowerCat === 'all' || itemCat === lowerCat) {
+          (item as HTMLElement).style.display = 'block';
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+
+      if (updateUrl) {
+        const newUrl = lowerCat === 'all' ? '/works' : `/works?filter=${lowerCat}`;
+        window.history.pushState({}, '', newUrl);
+      }
+    }
+
+    trigger?.addEventListener('click', () => menu?.classList.add('open'));
+    closeBtn?.addEventListener('click', () => menu?.classList.remove('open'));
+
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        const cat = (opt as HTMLElement).dataset.category || 'ALL';
+        applyFilter(cat);
+        menu?.classList.remove('open');
+      });
+    });
+
+    desktopBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = (btn as HTMLElement).dataset.category || 'ALL';
+        applyFilter(cat);
+      });
+    });
+
+    // Check URL params on load
+    const params = new URLSearchParams(window.location.search);
+    const initialFilter = params.get('filter');
+    if (initialFilter) {
+      applyFilter(initialFilter.toUpperCase(), false);
+    }
+  }
+
+  initWorksFilters();
+</script>
 
 <style>
   .works-page {
@@ -52,7 +135,8 @@ import { works } from '../../data/works';
     text-transform: uppercase;
   }
 
-  .filter-bar {
+  /* DESKTOP FILTER */
+  .filter-bar-desktop {
     display: flex;
     justify-content: center;
     gap: 40px;
@@ -65,12 +149,92 @@ import { works } from '../../data/works';
     font-size: 0.75rem;
     letter-spacing: 0.15em;
     opacity: 0.4;
-    transition: opacity 0.3s;
+    transition: all 0.3s;
   }
 
   .filter-item.active, .filter-item:hover {
     opacity: 1;
     color: var(--accent-color);
+  }
+
+  /* MOBILE FLOATING FILTER */
+  .mobile-filter-wrapper {
+    display: none;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .filter-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 12px 20px;
+    width: auto;
+    margin: 0 auto;
+    color: #fff;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+  }
+
+  .filter-trigger svg {
+    width: 14px;
+    height: 14px;
+    color: var(--accent-color);
+    flex-shrink: 0;
+  }
+
+  .floating-filter-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 100%;
+    background: rgba(15, 15, 15, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    z-index: 500;
+    padding: 25px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .floating-filter-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .filter-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mobile-opt {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.65rem;
+    text-align: center;
+  }
+
+  .mobile-opt.active {
+    background: var(--accent-color);
+    color: #000;
   }
 
   .gallery-grid-new {
@@ -80,8 +244,21 @@ import { works } from '../../data/works';
   }
 
   @media (max-width: 992px) {
+    .works-page { padding-top: 120px; }
     h1 { font-size: 3rem; }
-    .filter-bar { gap: 20px; overflow-x: auto; justify-content: flex-start; }
+    
+    .filter-bar-desktop {
+      display: none;
+    }
+
+    .mobile-filter-wrapper {
+      display: block;
+    }
+
+    .gallery-grid-new {
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
   }
 </style>
 <script>

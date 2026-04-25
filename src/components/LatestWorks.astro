@@ -13,14 +13,49 @@ const latestWorks = works.slice(0, 4);
     <a href="/works" class="view-all-works">VIEW ALL WORKS &rarr;</a>
   </div>
 
-  <div class="filter-row">
-    <button class="filter-item active">ALL</button>
-    <button class="filter-item">NOVEL</button>
-    <button class="filter-item">PUISI</button>
-    <button class="filter-item">CERPEN</button>
-    <button class="filter-item">ESAI</button>
-    <button class="filter-item">DESAIN</button>
-    <button class="filter-item">CATATAN</button>
+  <!-- Desktop Filter Row -->
+  <div class="filter-row-desktop">
+    <button class="filter-item active" data-category="ALL">
+      <span>ALL</span>
+    </button>
+    <button class="filter-item" data-category="NOVEL">
+      <span>NOVEL</span>
+    </button>
+    <button class="filter-item" data-category="PUISI">
+      <span>PUISI</span>
+    </button>
+    <button class="filter-item" data-category="CERPEN">
+      <span>CERPEN</span>
+    </button>
+    <button class="filter-item" data-category="ESAI">
+      <span>ESAI</span>
+    </button>
+    <button class="filter-item" data-category="DESAIN">
+      <span>DESAIN</span>
+    </button>
+    <button class="filter-item" data-category="CATATAN">
+      <span>CATATAN</span>
+    </button>
+  </div>
+
+  <!-- Mobile Floating Filter -->
+  <div class="mobile-filter-wrapper">
+    <button id="mobile-filter-trigger" class="filter-trigger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+      <span>FILTER ARCHIVE</span>
+    </button>
+    
+    <div id="mobile-filter-menu" class="floating-filter-menu">
+      <div class="menu-header">
+        <span>SELECT CATEGORY</span>
+        <button id="close-filter">&times;</button>
+      </div>
+      <div class="filter-options">
+        {['ALL', 'NOVEL', 'PUISI', 'CERPEN', 'ESAI', 'DESAIN', 'CATATAN'].map(cat => (
+          <button class="mobile-opt" data-category={cat}>{cat}</button>
+        ))}
+      </div>
+    </div>
   </div>
 
   <div class="gallery-grid-new">
@@ -33,3 +68,57 @@ const latestWorks = works.slice(0, 4);
 <style>
   @import "../styles/latest-works.css";
 </style>
+
+<script>
+  function initFloatingFilter() {
+    const trigger = document.getElementById('mobile-filter-trigger');
+    const menu = document.getElementById('mobile-filter-menu');
+    const closeBtn = document.getElementById('close-filter');
+    const opts = document.querySelectorAll('.mobile-opt');
+    const desktopBtns = document.querySelectorAll('.filter-item');
+    const galleryItems = document.querySelectorAll('.gallery-item-new');
+
+    function applyFilter(cat: string) {
+      const lowerCat = cat.toLowerCase();
+      
+      // Update UI (Desktop & Mobile)
+      [...opts, ...desktopBtns].forEach(btn => {
+        if ((btn as HTMLElement).dataset.category === cat) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Filter Gallery
+      galleryItems.forEach(item => {
+        const itemCat = (item as HTMLElement).dataset.category;
+        if (lowerCat === 'all' || itemCat === lowerCat) {
+          (item as HTMLElement).style.display = 'block';
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+    }
+
+    trigger?.addEventListener('click', () => menu?.classList.add('open'));
+    closeBtn?.addEventListener('click', () => menu?.classList.remove('open'));
+
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        const cat = (opt as HTMLElement).dataset.category || 'ALL';
+        applyFilter(cat);
+        menu?.classList.remove('open');
+      });
+    });
+
+    desktopBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = (btn as HTMLElement).dataset.category || 'ALL';
+        applyFilter(cat);
+      });
+    });
+  }
+
+  initFloatingFilter();
+</script>

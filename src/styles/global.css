@@ -60,6 +60,12 @@ button {
   padding: 0 40px;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
+}
+
 .section-num {
   font-size: 0.9rem;
   font-weight: 500;

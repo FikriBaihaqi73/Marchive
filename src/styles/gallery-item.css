@@ -64,3 +64,22 @@ h3 {
   opacity: 0.5;
   text-transform: uppercase;
 }
+
+@media (max-width: 768px) {
+  .content-box {
+    padding: 15px;
+  }
+  h3 {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+  }
+  .type {
+    font-size: 0.6rem;
+    margin-bottom: 10px;
+  }
+  .footer-info {
+    padding-top: 10px;
+    font-size: 0.6rem;
+  }
+}
+

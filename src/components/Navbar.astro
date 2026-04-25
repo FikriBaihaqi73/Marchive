@@ -7,14 +7,22 @@ const isActive = (path: string) => pathname === path || (path !== '/' && pathnam
   <div class="container nav-wrap">
     <a href="/" class="logo">MARCHIVE</a>
     
-    <div class="nav-links">
+    <div class="nav-links" id="nav-links">
       <a href="/" class={isActive('/') ? 'active' : ''}>HOME</a>
       <a href="/works" class={isActive('/works') ? 'active' : ''}>WORKS</a>
       <a href="/categories" class={isActive('/categories') ? 'active' : ''}>CATEGORIES</a>
       <a href="/about" class={isActive('/about') ? 'active' : ''}>ABOUT</a>
     </div>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </div>
 </nav>
+
+<script src="../scripts/navbar.ts"></script>
 
 <style>
   @import "../styles/navbar.css";

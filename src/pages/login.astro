@@ -1,0 +1,56 @@
+---
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<title>LOGIN | MARCHIVE ACCESS</title>
+		<style is:global>
+			@import "../styles/global.css";
+      @import "../styles/login.css";
+		</style>
+	</head>
+	<body>
+    <main class="login-page">
+      <div class="login-bg-decor">
+        <div class="decor-circle"></div>
+      </div>
+
+      <div class="login-card fade-in">
+        <header class="login-header">
+          <p>Restricted Area</p>
+          <h1>MARCHIVE</h1>
+          <div class="divider-small"></div>
+        </header>
+
+        <form class="login-form">
+          <div class="input-group">
+            <label for="identifier">ACCESS IDENTIFIER</label>
+            <input type="text" id="identifier" name="identifier" placeholder="Username or Email" required />
+          </div>
+
+          <div class="input-group">
+            <label for="passkey">SECURE PASSKEY</label>
+            <input type="password" id="passkey" name="passkey" placeholder="••••••••" required />
+          </div>
+
+          <button type="submit" class="login-btn">AUTHORIZE ACCESS</button>
+        </form>
+
+        <a href="/" class="back-to-site">&larr; RETURN TO PUBLIC ARCHIVE</a>
+      </div>
+    </main>
+	</body>
+</html>
+
+<style>
+  .divider-small {
+    width: 30px;
+    height: 1px;
+    background: var(--accent-color);
+    margin: 20px auto 0;
+  }
+</style>
