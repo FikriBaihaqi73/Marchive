@@ -4,22 +4,21 @@ import { db } from '@db/index';
 import { categories as categoryTable, works as worksTable } from '@schema/index';
 import { count, eq } from 'drizzle-orm';
 
-// Fetch real categories from database with work counts
+// Fetch real categories with work counts
 const categories = await Promise.all((await db.select().from(categoryTable)).map(async (cat) => {
-  const [{ count: workCount }] = await db
+  const [{ count: worksCount }] = await db
     .select({ count: count(worksTable.id) })
     .from(worksTable)
     .where(eq(worksTable.categoryId, cat.id));
   
-  return { ...cat, count: workCount };
+  return { ...cat, worksCount };
 }));
 ---
 
-
 <AdminLayout title="Category Management" activePage="categories">
   <div class="works-list-header">
-    <div class="header-text">
-      <p style="opacity: 0.6;">Organize your gallery by creating and managing categories.</p>
+    <div class="header-left">
+      <p>Organize your gallery by creating and managing categories.</p>
     </div>
     <a href="/admin/categories/new" class="btn-primary">+ New Category</a>
   </div>
@@ -28,87 +27,16 @@ const categories = await Promise.all((await db.select().from(categoryTable)).map
     {categories.map(cat => (
       <div class="category-card">
         <div class="cat-info">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-            <h3>{cat.name}</h3>
-            <span style={`font-size: 0.6rem; letter-spacing: 0.1em; color: ${cat.type === 'book' ? 'var(--accent-color)' : '#44ff44'}; border: 1px solid currentColor; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;`}>
-              {cat.type}
-            </span>
-          </div>
-          <span class="cat-slug">/{cat.slug}</span>
+          <div class="cat-type-badge">{cat.type.toUpperCase()}</div>
+          <h3>{cat.name}</h3>
+          <p>{cat.description}</p>
         </div>
         
-        <div class="cat-meta">
-          <div class="cat-badge">{cat.count} Works</div>
-          <div class="action-btns">
-            <a href={`/admin/categories/${cat.id}/edit`} class="btn-icon" title="Edit" style="text-decoration: none;">✎</a>
-            <button class="btn-icon" style="color: #ff4444;" title="Delete">&times;</button>
-          </div>
+        <div class="cat-footer">
+          <span class="work-count"><strong>{cat.worksCount}</strong> items</span>
+          <a href={`/admin/categories/${cat.id}/edit`} class="btn-edit">Edit Settings</a>
         </div>
       </div>
     ))}
   </div>
-
 </AdminLayout>
-
-<style>
-  .category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-  }
-
-  .category-card {
-    background: var(--admin-card-bg);
-    border: 1px solid var(--glass-border);
-    padding: 25px;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 20px;
-    transition: all 0.3s ease;
-  }
-
-  .category-card:hover {
-    border-color: var(--accent-color);
-    background: rgba(255,255,255,0.05);
-  }
-
-  .cat-info h3 {
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-  }
-
-  .cat-slug {
-    font-size: 0.75rem;
-    opacity: 0.4;
-    letter-spacing: 0.1em;
-  }
-
-  .cat-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .cat-badge {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    background: rgba(212, 175, 55, 0.1);
-    padding: 6px 12px;
-    border-radius: 20px;
-    text-transform: uppercase;
-  }
-
-  @media (max-width: 768px) {
-    .category-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
-
-

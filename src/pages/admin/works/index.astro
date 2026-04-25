@@ -30,8 +30,8 @@ const works = await Promise.all((await db
 
 <AdminLayout title="Content Archive" activePage="works">
   <div class="works-list-header">
-    <div class="header-text">
-      <p style="opacity: 0.6;">Manage your gallery entries and their chapters.</p>
+    <div class="header-left">
+      <p>Manage your gallery entries and their chapters.</p>
     </div>
     <div class="new-content-dropdown">
       <button class="btn-primary" id="dropdown-toggle">+ New Content</button>
@@ -88,10 +88,6 @@ const works = await Promise.all((await db
 
         <div class="story-actions">
           <a href={`/admin/works/${work.id}`} class="btn-continue" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border);">Manage Work</a>
-          <div class="action-btns" style="justify-content: flex-end;">
-            <button class="btn-icon" title="Settings">⚙</button>
-            <button class="btn-icon" style="color: #ff4444;">&times;</button>
-          </div>
         </div>
       </div>
     ))}
@@ -102,5 +98,3 @@ const works = await Promise.all((await db
     )}
   </div>
 </AdminLayout>
-
-

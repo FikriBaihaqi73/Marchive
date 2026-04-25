@@ -235,15 +235,13 @@
   :root {
     --admin-sidebar-width: 0px;
   }
-
-@media (max-width: 992px) {
   .admin-sidebar {
     left: -100%;
     width: 280px;
-    background: #000 !important; /* Solid black for mobile */
+    background: #000 !important;
     transition: all 0.4s cubic-bezier(0.77, 0, 0.175, 1);
     box-shadow: 20px 0 50px rgba(0,0,0,0.8);
-    z-index: 9999 !important; /* Above everything */
+    z-index: 9999 !important;
   }
 
   .admin-sidebar.open {
@@ -719,18 +717,27 @@
   z-index: 2000 !important;
 }
 
-/* Ensure Mobile Toggle button is visible */
+/* MOBILE TOGGLE BUTTON */
 .admin-mobile-toggle {
-  display: flex !important;
-  position: fixed !important;
-  top: 20px !important;
-  left: 20px !important;
-  z-index: 9000 !important;
+  display: none;
+  background: #000;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  padding: 8px 15px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
-@media (min-width: 993px) {
+@media (max-width: 992px) {
   .admin-mobile-toggle {
-    display: none !important;
+    display: flex;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9000;
   }
 }
 
@@ -747,7 +754,8 @@
     padding-top: 80px !important;
   }
 }
-}
+
+
 /* ================= NEW CONTENT DROPDOWN ================= */
 .new-content-dropdown {
   position: relative;
