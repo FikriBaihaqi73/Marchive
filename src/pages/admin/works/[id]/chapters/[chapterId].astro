@@ -1,0 +1,181 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import RichTextEditor from '@components/admin/RichTextEditor.astro';
+import { db } from '@db/index';
+import { chapters as chaptersTable, works as worksTable } from '@schema/index';
+import { eq, and } from 'drizzle-orm';
+
+const { id, chapterId } = Astro.params;
+const workId = parseInt(id || '0');
+const chId = parseInt(chapterId || '0');
+
+// 1. Fetch current chapter data
+const [chapter] = await db
+  .select()
+  .from(chaptersTable)
+  .where(
+    and(
+      eq(chaptersTable.id, chId),
+      eq(chaptersTable.workId, workId)
+    )
+  )
+  .limit(1);
+
+if (!chapter) return Astro.redirect(`/admin/works/${workId}`);
+
+// 2. Fetch parent work info
+const [work] = await db.select().from(worksTable).where(eq(worksTable.id, workId)).limit(1);
+
+let error = '';
+let success = '';
+
+// 3. Handle POST Actions
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const action = data.get('action')?.toString();
+
+    if (action === 'delete') {
+      await db.delete(chaptersTable).where(eq(chaptersTable.id, chId));
+      return Astro.redirect(`/admin/works/${workId}`);
+    }
+
+    const title = data.get('title')?.toString();
+    const order = parseInt(data.get('order')?.toString() || '0');
+    const content = data.get('content')?.toString();
+
+    if (title && content) {
+      await db.update(chaptersTable)
+        .set({ title, order, content })
+        .where(eq(chaptersTable.id, chId));
+
+      success = 'Chapter updated successfully!';
+    } else {
+      error = 'Title and Content are required.';
+    }
+  } catch (e) {
+    error = 'Failed to process request.';
+    console.error(e);
+  }
+}
+---
+
+
+<AdminLayout title={`Edit Chapter: ${chapter.title}`} activePage="works">
+  <div style="max-width: 900px;">
+    <div class="form-header">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <a href={`/admin/works/${workId}`} class="back-link">&larr; BACK TO WORK</a>
+          <h1>Edit Chapter</h1>
+          <p style="opacity: 0.5;">Editing: <strong>{chapter.title}</strong> for <em>{work?.title}</em></p>
+        </div>
+        <div class="actions">
+           <a href={`/works/${workId}/${chapter.id}`} target="_blank" class="btn-preview">VIEW PUBLIC &rarr;</a>
+        </div>
+      </div>
+    </div>
+
+    {error && (
+      <div class="alert alert-error">
+        {error}
+      </div>
+    )}
+
+    {success && (
+      <div class="alert alert-success">
+        {success}
+      </div>
+    )}
+
+    <form class="admin-form" method="POST" id="edit-chapter-form">
+      <input type="hidden" name="content" id="hidden-content" />
+      <input type="hidden" name="action" id="form-action" value="update" />
+      
+      <div style="display: grid; grid-template-columns: 1fr 120px; gap: 20px;">
+        <div class="form-group">
+          <label for="title">CHAPTER TITLE</label>
+          <input type="text" id="title" name="title" class="form-control" value={chapter.title} required />
+        </div>
+        <div class="form-group">
+          <label for="order">ORDER</label>
+          <input type="number" id="order" name="order" class="form-control" value={chapter.order} required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>CHAPTER CONTENT</label>
+        <RichTextEditor initialValue={chapter.content} />
+      </div>
+
+      <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px; display: flex; gap: 15px;">
+        <button type="submit" class="btn-primary">SAVE CHANGES</button>
+        <button type="button" class="btn-secondary" style="border: 1px solid #ff4444; color: #ff4444;" id="delete-btn">DELETE CHAPTER</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<style>
+  .form-header { margin-bottom: 50px; }
+  .back-link { font-size: 0.7rem; letter-spacing: 0.1em; opacity: 0.5; text-decoration: none; margin-bottom: 15px; display: block; }
+  .form-header h1 { font-size: 2rem; font-family: var(--font-serif); margin-bottom: 5px; }
+
+  .alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    font-size: 0.85rem;
+    border: 1px solid;
+  }
+
+  .alert-error {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border-color: rgba(255, 68, 68, 0.2);
+  }
+
+  .alert-success {
+    background: rgba(68, 255, 68, 0.1);
+    color: #44ff44;
+    border-color: rgba(68, 255, 68, 0.2);
+  }
+
+  .btn-preview {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-decoration: none;
+    border: 1px solid var(--accent-color);
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+
+  .btn-preview:hover {
+    background: var(--accent-color);
+    color: #000;
+  }
+</style>
+
+<script is:inline>
+  const form = document.getElementById('edit-chapter-form');
+  const hiddenInput = document.getElementById('hidden-content');
+  const actionInput = document.getElementById('form-action');
+
+  form?.addEventListener('submit', (e) => {
+    if (window.quill) {
+      hiddenInput.value = window.quill.root.innerHTML;
+    }
+  });
+
+  // Real Delete Functionality
+  document.getElementById('delete-btn')?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this chapter? This action cannot be undone.')) {
+      if (actionInput && form) {
+        actionInput.value = 'delete';
+        form.submit();
+      }
+    }
+  });
+</script>

@@ -1,0 +1,135 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { db } from '@db/index';
+import { categories as categoryTable, works as worksTable } from '@schema/index';
+import { eq, count } from 'drizzle-orm';
+
+const { id } = Astro.params;
+const catId = parseInt(id || '0');
+
+// 1. Fetch current category
+const [category] = await db.select().from(categoryTable).where(eq(categoryTable.id, catId)).limit(1);
+
+if (!category) return Astro.redirect('/admin/categories');
+
+let error = '';
+let success = '';
+
+// 2. Handle POST Actions
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const action = data.get('action')?.toString();
+
+    if (action === 'delete') {
+      // Safety check: Don't delete if works exist
+      const [{ count: workCount }] = await db
+        .select({ count: count(worksTable.id) })
+        .from(worksTable)
+        .where(eq(worksTable.categoryId, catId));
+
+      if (workCount > 0) {
+        error = `Cannot delete category. It is currently being used by ${workCount} works.`;
+      } else {
+        await db.delete(categoryTable).where(eq(categoryTable.id, catId));
+        return Astro.redirect('/admin/categories');
+      }
+    } else {
+      const name = data.get('name')?.toString();
+      const type = data.get('type')?.toString();
+      const slug = data.get('slug')?.toString();
+      const description = data.get('description')?.toString();
+
+      if (name && type && slug) {
+        await db.update(categoryTable)
+          .set({ name, type, slug, description })
+          .where(eq(categoryTable.id, catId));
+
+        success = 'Category updated successfully!';
+      } else {
+        error = 'Name, Type, and Slug are required.';
+      }
+    }
+  } catch (e) {
+    error = 'Failed to process request.';
+    console.error(e);
+  }
+}
+---
+
+
+<AdminLayout title={`Edit Category: ${category.name}`} activePage="categories">
+  <div style="max-width: 600px;">
+    <div class="form-header">
+      <a href="/admin/categories" class="back-link">&larr; BACK TO LIST</a>
+      <h1>Edit Category</h1>
+    </div>
+
+    {error && <div class="alert alert-error">{error}</div>}
+    {success && <div class="alert alert-success">{success}</div>}
+
+    <form class="admin-form" method="POST" id="edit-category-form">
+      <input type="hidden" name="action" id="form-action" value="update" />
+      <div class="form-group">
+        <label for="name">CATEGORY NAME</label>
+        <input type="text" id="name" name="name" class="form-control" value={category.name} required />
+      </div>
+
+      <div class="form-group">
+        <label for="type">CONTENT TYPE</label>
+        <select id="type" name="type" class="form-control" required>
+          <option value="book" selected={category.type === 'book'}>Book / Series</option>
+          <option value="single" selected={category.type === 'single'}>Single Piece</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="slug">URL SLUG</label>
+        <input type="text" id="slug" name="slug" class="form-control" value={category.slug} required />
+      </div>
+
+      <div class="form-group">
+        <label for="description">DESCRIPTION</label>
+        <textarea id="description" name="description" class="form-control" rows="4">{category.description}</textarea>
+      </div>
+
+      <div style="margin-top: 40px; display: flex; gap: 15px;">
+        <button type="submit" class="btn-primary">SAVE CHANGES</button>
+        <button type="button" class="btn-secondary" style="border: 1px solid #ff4444; color: #ff4444;" id="delete-btn">DELETE CATEGORY</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<style>
+  .form-header { margin-bottom: 50px; }
+  .back-link { font-size: 0.7rem; letter-spacing: 0.1em; opacity: 0.5; text-decoration: none; margin-bottom: 15px; display: block; }
+  .form-header h1 { font-size: 2.5rem; font-family: var(--font-serif); }
+
+  .alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    font-size: 0.85rem;
+    border: 1px solid;
+  }
+
+  .alert-error { background: rgba(255, 68, 68, 0.1); color: #ff4444; border-color: rgba(255, 68, 68, 0.2); }
+  .alert-success { background: rgba(68, 255, 68, 0.1); color: #44ff44; border-color: rgba(68, 255, 68, 0.2); }
+</style>
+
+<script is:inline>
+  const form = document.getElementById('edit-category-form');
+  const actionInput = document.getElementById('form-action');
+
+  // Delete Category
+  document.getElementById('delete-btn')?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this category? This cannot be undone.')) {
+      if (actionInput && form) {
+        actionInput.value = 'delete';
+        form.submit();
+      }
+    }
+  });
+</script>
+

@@ -1,32 +1,59 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { works, type Work } from '../../../data/works';
+import { db } from '../../../db';
+import { works as worksTable, chapters as chaptersTable } from '../../../db/schema';
+import { eq, and, asc, desc, lt, gt } from 'drizzle-orm';
 
-export function getStaticPaths() {
-  const chapterPaths: any[] = [];
-  
-  works.forEach((work: Work) => {
-    if (work.layout === 'book' && work.data.chapters) {
-      work.data.chapters.forEach((chapter) => {
-        chapterPaths.push({
-          params: { id: work.id, chapterId: chapter.id },
-          props: { work, chapter },
-        });
-      });
-    }
-  });
+const { id, chapterId } = Astro.params;
+const workId = parseInt(id || '0');
 
-  return chapterPaths;
-}
+// 1. Fetch current chapter
+const [chapter] = await db
+  .select()
+  .from(chaptersTable)
+  .where(
+    and(
+      eq(chaptersTable.workId, workId),
+      eq(chaptersTable.id, parseInt(chapterId || '0'))
+    )
+  )
+  .limit(1);
 
-const { work, chapter } = Astro.props as { work: Work, chapter: any };
+if (!chapter) return Astro.redirect('/404');
 
-// Navigasi
-const chapters = work.data.chapters || [];
-const chapterIndex = chapters.findIndex((c: any) => c.id === chapter.id) ?? -1;
-const prevChapter = chapters[chapterIndex - 1];
-const nextChapter = chapters[chapterIndex + 1];
+// 2. Fetch parent work
+const [work] = await db
+  .select()
+  .from(worksTable)
+  .where(eq(worksTable.id, workId))
+  .limit(1);
+
+// 3. Navigation: Fetch Prev and Next Chapters
+const [prevChapter] = await db
+  .select()
+  .from(chaptersTable)
+  .where(
+    and(
+      eq(chaptersTable.workId, workId),
+      lt(chaptersTable.order, chapter.order)
+    )
+  )
+  .orderBy(desc(chaptersTable.order))
+  .limit(1);
+
+const [nextChapter] = await db
+  .select()
+  .from(chaptersTable)
+  .where(
+    and(
+      eq(chaptersTable.workId, workId),
+      gt(chaptersTable.order, chapter.order)
+    )
+  )
+  .orderBy(asc(chaptersTable.order))
+  .limit(1);
 ---
+
 
 <Layout title={`${work.title} - ${chapter.title}`}>
   <!-- Special Reader Layout to override global nav if needed via CSS -->
@@ -53,12 +80,11 @@ const nextChapter = chapters[chapterIndex + 1];
     <main class="reader-main container">
       <article class="reader-article">
         <header class="reader-header">
-          <span class="chapter-label">{chapter.id.toUpperCase()}</span>
+          <span class="chapter-label">CHAPTER {chapter.order}</span>
           <h1>{chapter.title}</h1>
         </header>
 
-        <section class="reader-body serif">
-          {chapter.content}
+        <section class="reader-body serif ql-editor" set:html={chapter.content}>
         </section>
 
         <section class="reader-footer-nav">
@@ -75,17 +101,20 @@ const nextChapter = chapters[chapterIndex + 1];
             </div>
           ) : (
             <div class="end-book">
-              <p>You've finished the available chapters.</p>
-              <a href="/works" class="btn-archive">BACK TO ARCHIVE</a>
+              <p style="text-align: center; opacity: 0.5; margin-bottom: 30px;">You've finished the available chapters.</p>
+              <div style="text-align: center;">
+                <a href={`/works/${work.id}`} class="btn-archive">BACK TO BOOK DETAIL</a>
+              </div>
             </div>
           )}
           
           <div class="bottom-utility">
-            {prevChapter && <a href={`/works/${work.id}/${prevChapter.id}`}>&larr; Previous Chapter</a>}
+            {prevChapter && <a href={`/works/${work.id}/${prevChapter.id}`} style="color: var(--accent-color); text-decoration: none;">&larr; Previous Chapter</a>}
           </div>
         </section>
       </article>
     </main>
+
   </div>
 </Layout>
 

@@ -1,0 +1,41 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { db } from '@db/index';
+import { works as worksTable, categories as categoryTable, chapters as chaptersTable } from '@db/schema';
+import { count, eq } from 'drizzle-orm';
+
+// Fetch Real Stats
+const [totalWorks] = await db.select({ value: count() }).from(worksTable);
+const [totalChapters] = await db.select({ value: count() }).from(chaptersTable);
+const [totalCategories] = await db.select({ value: count() }).from(categoryTable);
+const [totalBooks] = await db.select({ value: count() }).from(worksTable).where(eq(worksTable.type, 'book'));
+const [totalSingles] = await db.select({ value: count() }).from(worksTable).where(eq(worksTable.type, 'single'));
+
+const stats = [
+  { label: 'Total Works', value: totalWorks.value.toString() },
+  { label: 'Books/Series', value: totalBooks.value.toString() },
+  { label: 'Single Pieces', value: totalSingles.value.toString() },
+  { label: 'Total Chapters', value: totalChapters.value.toString() },
+  { label: 'Categories', value: totalCategories.value.toString() },
+];
+---
+
+
+<AdminLayout title="Dashboard Overview" activePage="dashboard">
+  <section class="stats-grid">
+    {stats.map(stat => (
+      <div class="stat-card">
+        <span class="stat-label">{stat.label}</span>
+        <span class="stat-value">{stat.value}</span>
+      </div>
+    ))}
+  </section>
+
+  <section style="margin-top: 60px;">
+    <h2 style="font-family: var(--font-serif); margin-bottom: 30px;">Quick Actions</h2>
+    <div style="display: flex; gap: 20px;">
+      <a href="/admin/works/new" class="btn-primary" style="text-decoration: none;">Create New Work</a>
+      <a href="/admin/categories" class="btn-primary" style="text-decoration: none; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border);">Manage Categories</a>
+    </div>
+  </section>
+</AdminLayout>

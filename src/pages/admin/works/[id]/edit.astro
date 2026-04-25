@@ -1,0 +1,163 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import RichTextEditor from '@components/admin/RichTextEditor.astro';
+import { db } from '@db/index';
+import { works as worksTable, categories as categoryTable } from '@schema/index';
+import { eq } from 'drizzle-orm';
+
+const { id } = Astro.params;
+const workId = parseInt(id || '0');
+
+// 1. Fetch current work data
+const [work] = await db.select().from(worksTable).where(eq(worksTable.id, workId)).limit(1);
+
+if (!work) return Astro.redirect('/admin/works');
+
+// 2. Fetch categories for dropdown
+const categories = await db.select().from(categoryTable).where(eq(categoryTable.type, work.type));
+
+let error = '';
+let success = '';
+
+// 3. Handle POST Actions
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const action = data.get('action')?.toString();
+
+    if (action === 'delete') {
+      await db.delete(worksTable).where(eq(worksTable.id, workId));
+      return Astro.redirect('/admin/works');
+    }
+
+    const title = data.get('title')?.toString();
+    const categoryId = parseInt(data.get('categoryId')?.toString() || '0');
+    const cover = data.get('cover')?.toString();
+    const synopsis = data.get('synopsis')?.toString();
+    const content = data.get('content')?.toString();
+
+    if (title && categoryId) {
+      await db.update(worksTable)
+        .set({ 
+          title, 
+          categoryId, 
+          cover, 
+          synopsis: work.type === 'book' ? synopsis : null,
+          content: work.type === 'single' ? content : null
+        })
+        .where(eq(worksTable.id, workId));
+
+      success = 'Work updated successfully!';
+    } else {
+      error = 'Title and Category are required.';
+    }
+  } catch (e) {
+    error = 'Failed to process request.';
+    console.error(e);
+  }
+}
+
+const isSingle = work.type === 'single';
+---
+
+<AdminLayout title={`Edit Metadata: ${work.title}`} activePage="works">
+  <div style="max-width: 900px;">
+    <div class="form-header">
+      <a href={`/admin/works/${workId}`} class="back-link">&larr; BACK TO MANAGEMENT</a>
+      <h1>Edit Work Metadata</h1>
+      <p style="opacity: 0.5;">Managing basic info for: <strong>{work.title}</strong></p>
+    </div>
+
+    {error && <div class="alert alert-error">{error}</div>}
+    {success && <div class="alert alert-success">{success}</div>}
+
+    <form class="admin-form" method="POST" id="edit-work-form">
+      <input type="hidden" name="content" id="hidden-content" />
+      <input type="hidden" name="action" id="form-action" value="update" />
+
+      <div class="form-group">
+        <label for="title">TITLE</label>
+        <input type="text" id="title" name="title" class="form-control" value={work.title} required />
+      </div>
+
+      <div class="form-group">
+        <label for="categoryId">CATEGORY</label>
+        <select id="categoryId" name="categoryId" class="form-control" required>
+          {categories.map(cat => (
+            <option value={cat.id} selected={cat.id === work.categoryId}>{cat.name}</option>
+          ))}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="cover">COVER IMAGE URL</label>
+        <input type="text" id="cover" name="cover" class="form-control" value={work.cover || ''} placeholder="https://image-link.com/photo.jpg" />
+      </div>
+
+      {isSingle ? (
+        <div class="form-group">
+          <label>CONTENT EDITOR</label>
+          <RichTextEditor initialValue={work.content || ''} />
+        </div>
+      ) : (
+        <div class="form-group">
+          <label for="synopsis">SYNOPSIS / DESCRIPTION</label>
+          <textarea id="synopsis" name="synopsis" class="form-control" rows="8">{work.synopsis}</textarea>
+        </div>
+      )}
+
+      <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px; display: flex; gap: 15px;">
+        <button type="submit" class="btn-primary">SAVE ALL CHANGES</button>
+        <button type="button" class="btn-secondary" style="border: 1px solid #ff4444; color: #ff4444;" id="delete-btn">DELETE WORK</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<style>
+  .form-header { margin-bottom: 50px; }
+  .back-link { font-size: 0.7rem; letter-spacing: 0.1em; opacity: 0.5; text-decoration: none; margin-bottom: 15px; display: block; }
+  .form-header h1 { font-size: 2.5rem; font-family: var(--font-serif); margin-bottom: 5px; }
+
+  .alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    font-size: 0.85rem;
+    border: 1px solid;
+  }
+
+  .alert-error {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border-color: rgba(255, 68, 68, 0.2);
+  }
+
+  .alert-success {
+    background: rgba(68, 255, 68, 0.1);
+    color: #44ff44;
+    border-color: rgba(68, 255, 68, 0.2);
+  }
+</style>
+
+<script is:inline>
+  const form = document.getElementById('edit-work-form');
+  const hiddenInput = document.getElementById('hidden-content');
+  const actionInput = document.getElementById('form-action');
+
+  form?.addEventListener('submit', (e) => {
+    if (window.quill) {
+      hiddenInput.value = window.quill.root.innerHTML;
+    }
+  });
+
+  // Delete Work
+  document.getElementById('delete-btn')?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this entire work? This will also delete all associated chapters. This action cannot be undone.')) {
+      if (actionInput && form) {
+        actionInput.value = 'delete';
+        form.submit();
+      }
+    }
+  });
+</script>

@@ -1,41 +1,47 @@
 ---
 import GalleryItem from './GalleryItem.astro';
-import { works } from '../data/works';
-const latestWorks = works.slice(0, 4);
+import { db } from '../db';
+import { works as worksTable, categories as categoryTable } from '../db/schema';
+import { desc, eq } from 'drizzle-orm';
+
+// 1. Fetch Categories for Filters
+const dbCategories = await db.select().from(categoryTable);
+
+// 2. Fetch Latest 6 Published Works with Category Names
+const latestWorks = await db
+  .select({
+    id: worksTable.id,
+    title: worksTable.title,
+    cover: worksTable.cover,
+    type: worksTable.type,
+    status: worksTable.status,
+    category: categoryTable.name,
+    createdAt: worksTable.createdAt,
+  })
+  .from(worksTable)
+  .leftJoin(categoryTable, eq(worksTable.categoryId, categoryTable.id))
+  .where(eq(worksTable.status, 'published'))
+  .orderBy(desc(worksTable.createdAt))
+  .limit(6);
 ---
 
 <section id="works" class="works-section container">
-  <div class="section-header-row">
-    <div class="header-left">
-      <div class="section-num">02</div>
-      <h2>LATEST WORKS</h2>
-    </div>
-    <a href="/works" class="view-all-works">VIEW ALL WORKS &rarr;</a>
-  </div>
+  <header class="section-header">
+    <div class="section-num">02 / LATEST</div>
+    <h2>LATEST WORKS</h2>
+    <p class="subtitle text-muted">Recently unearthed from the archives.</p>
+  </header>
 
   <!-- Desktop Filter Row -->
   <div class="filter-row-desktop">
     <button class="filter-item active" data-category="ALL">
       <span>ALL</span>
     </button>
-    <button class="filter-item" data-category="NOVEL">
-      <span>NOVEL</span>
-    </button>
-    <button class="filter-item" data-category="PUISI">
-      <span>PUISI</span>
-    </button>
-    <button class="filter-item" data-category="CERPEN">
-      <span>CERPEN</span>
-    </button>
-    <button class="filter-item" data-category="ESAI">
-      <span>ESAI</span>
-    </button>
-    <button class="filter-item" data-category="DESAIN">
-      <span>DESAIN</span>
-    </button>
-    <button class="filter-item" data-category="CATATAN">
-      <span>CATATAN</span>
-    </button>
+    {dbCategories.map(cat => (
+      <button class="filter-item" data-category={cat.name.toUpperCase()}>
+        <span>{cat.name.toUpperCase()}</span>
+      </button>
+    ))}
   </div>
 
   <!-- Mobile Floating Filter -->
@@ -51,8 +57,9 @@ const latestWorks = works.slice(0, 4);
         <button id="close-filter">&times;</button>
       </div>
       <div class="filter-options">
-        {['ALL', 'NOVEL', 'PUISI', 'CERPEN', 'ESAI', 'DESAIN', 'CATATAN'].map(cat => (
-          <button class="mobile-opt" data-category={cat}>{cat}</button>
+        <button class="mobile-opt active" data-category="ALL">ALL</button>
+        {dbCategories.map(cat => (
+          <button class="mobile-opt" data-category={cat.name.toUpperCase()}>{cat.name.toUpperCase()}</button>
         ))}
       </div>
     </div>
@@ -60,8 +67,22 @@ const latestWorks = works.slice(0, 4);
 
   <div class="gallery-grid-new">
     {latestWorks.map((work) => (
-      <GalleryItem {...work} />
+      <GalleryItem 
+        id={work.id.toString()} 
+        title={work.title} 
+        category={work.category || 'Uncategorized'} 
+        cover={work.cover || "https://via.placeholder.com/600x800"}
+        date={new Date(work.createdAt).getFullYear().toString()}
+      />
     ))}
+    {latestWorks.length === 0 && (
+      <p style="grid-column: 1/-1; text-align: center; opacity: 0.5; padding: 50px;">No works published yet.</p>
+    )}
+  </div>
+
+
+  <div class="works-footer">
+    <a href="/works" class="btn-outline">VIEW ALL WORKS</a>
   </div>
 </section>
 

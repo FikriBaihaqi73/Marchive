@@ -1,17 +1,36 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { works } from '../data/works';
+import Layout from '@layouts/Layout.astro';
+import { db } from '@db/index';
+import { categories as categoryTable, works as worksTable } from '@db/schema';
+import { eq, count, desc } from 'drizzle-orm';
 
-// Ambil semua kategori unik
-const categories = [...new Set(works.map(w => w.category))];
+// 1. Fetch all categories from database
+const dbCategories = await db.select().from(categoryTable);
 
-// Kelompokkan karya berdasarkan kategori
-const categorizedWorks = categories.map(cat => ({
-  name: cat,
-  count: works.filter(w => w.category === cat).length,
-  covers: works.filter(w => w.category === cat).slice(0, 3).map(w => w.cover)
+// 2. Build categorized data with real counts and covers
+const categorizedWorks = await Promise.all(dbCategories.map(async (cat) => {
+  // Count works in this category
+  const [workCount] = await db
+    .select({ value: count() })
+    .from(worksTable)
+    .where(eq(worksTable.categoryId, cat.id));
+
+  // Get top 3 covers for the collage
+  const recentWorks = await db
+    .select({ cover: worksTable.cover })
+    .from(worksTable)
+    .where(eq(worksTable.categoryId, cat.id))
+    .orderBy(desc(worksTable.createdAt))
+    .limit(3);
+
+  return {
+    name: cat.name,
+    count: workCount.value,
+    covers: recentWorks.map(w => w.cover).filter(Boolean) as string[]
+  };
 }));
 ---
+
 
 <Layout>
   <main class="categories-page container">

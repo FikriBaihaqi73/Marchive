@@ -1,0 +1,137 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { db } from '@db/index';
+import { categories as categoryTable, works as worksTable } from '@db/schema';
+import { eq } from 'drizzle-orm';
+import RichTextEditor from '../../../components/admin/RichTextEditor.astro';
+
+const type = Astro.url.searchParams.get('type') || 'book';
+const isSingle = type === 'single';
+
+let error = '';
+
+// Handle Form Submission
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const title = data.get('title')?.toString();
+    const categoryId = parseInt(data.get('categoryId')?.toString() || '0');
+    const cover = data.get('cover')?.toString();
+    const synopsis = data.get('synopsis')?.toString();
+    const content = data.get('content')?.toString(); // Content from Rich Text Editor
+
+    if (title && categoryId) {
+      const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+      
+      const [newWork] = await db.insert(worksTable).values({
+        title,
+        slug,
+        categoryId,
+        type: isSingle ? 'single' : 'book',
+        cover,
+        synopsis: isSingle ? null : synopsis,
+        content: isSingle ? content : null,
+        status: 'draft', // Default to draft
+      }).returning();
+
+      return Astro.redirect('/admin/works');
+    } else {
+      error = 'Title and Category are required.';
+    }
+  } catch (e) {
+    error = 'Failed to save work. Please check your data.';
+    console.error(e);
+  }
+}
+
+// Fetch real categories from database
+const allCategories = await db.select().from(categoryTable);
+const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 'single' : 'book'));
+---
+
+<AdminLayout title={isSingle ? "Create Single Piece" : "Start New Book"} activePage="new-work">
+  <div style="max-width: 900px;" data-type={type} id="creation-container">
+    {error && (
+      <div style="background: rgba(255, 68, 68, 0.1); color: #ff4444; padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255, 68, 68, 0.2); font-size: 0.85rem;">
+        {error}
+      </div>
+    )}
+
+    <form class="admin-form" method="POST" id="main-form">
+      <!-- Hidden input for Rich Text content -->
+      <input type="hidden" name="content" id="hidden-content" />
+      <div class="form-group">
+        <label for="title">{isSingle ? "TITLE OF YOUR PIECE" : "BOOK TITLE"}</label>
+        <input type="text" id="title" name="title" class="form-control" placeholder={isSingle ? "e.g. Midnight Sonnet" : "e.g. Chronicles of Marchive"} required />
+      </div>
+
+      <div class="form-group">
+        <label for="category">CATEGORY</label>
+        <select id="category" name="categoryId" class="form-control">
+          {filteredCategories.map(cat => (
+            <option value={cat.id}>{cat.name}</option>
+          ))}
+          {filteredCategories.length === 0 && (
+            <option disabled>No categories found for this type</option>
+          )}
+        </select>
+      </div>
+
+
+      <!-- SINGLE PIECE EDITOR -->
+      <div id="single-editor-area" style={isSingle ? "display: block;" : "display: none;"}>
+        <div class="form-group">
+          <label>CONTENT (YOUR WORK)</label>
+          <RichTextEditor placeholder="Tuliskan baris puisi atau narasi karya Anda di sini..." />
+        </div>
+      </div>
+
+      <!-- BOOK SYNOPSIS AREA -->
+      <div id="book-metadata-area" style={isSingle ? "display: none;" : "display: block;"}>
+        <div class="form-group">
+          <label for="synopsis">SYNOPSIS / DESCRIPTION</label>
+          <textarea id="synopsis" name="synopsis" class="form-control" rows="6" placeholder="What is this book about?"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cover">COVER / THUMBNAIL IMAGE URL</label>
+        <input type="text" id="cover" name="cover" class="form-control" placeholder="https://image-link.com/cover.jpg" />
+      </div>
+
+      <div style="display: flex; gap: 20px; align-items: center; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
+        <button type="submit" class="btn-primary" id="submit-btn">
+          {isSingle ? "PUBLISH PIECE" : "CREATE BOOK"}
+        </button>
+        <a href="/admin/works" style="color: #fff; opacity: 0.5; text-decoration: none; font-size: 0.8rem;">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <script is:inline>
+    // 1. UI Toggling (Single vs Book)
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type');
+    
+    if (type === 'single') {
+      document.getElementById('single-editor-area').style.display = 'block';
+      document.getElementById('book-metadata-area').style.display = 'none';
+      document.getElementById('submit-btn').innerText = 'PUBLISH PIECE';
+    }
+
+    // 2. Sync Quill Content on Submit
+    const form = document.getElementById('main-form');
+    const hiddenInput = document.getElementById('hidden-content');
+
+    form?.addEventListener('submit', (e) => {
+      // Access global Quill instance (defined in RichTextEditor component)
+      if (window.quill) {
+        hiddenInput.value = window.quill.root.innerHTML;
+        console.log('Syncing content:', hiddenInput.value);
+      }
+    });
+  </script>
+
+</AdminLayout>
+
+

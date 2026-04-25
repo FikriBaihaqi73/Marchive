@@ -1,0 +1,107 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import RichTextEditor from '@components/admin/RichTextEditor.astro';
+import { db } from '@db/index';
+import { chapters as chaptersTable, works as worksTable } from '@schema/index';
+import { eq, count } from 'drizzle-orm';
+
+const { id } = Astro.params;
+const workId = parseInt(id || '0');
+
+// Fetch work to confirm it exists
+const [work] = await db.select().from(worksTable).where(eq(worksTable.id, workId)).limit(1);
+if (!work) return Astro.redirect('/admin/works');
+
+// Get next order number
+const [{ count: currentChapters }] = await db
+  .select({ count: count(chaptersTable.id) })
+  .from(chaptersTable)
+  .where(eq(chaptersTable.workId, workId));
+
+const nextOrder = currentChapters + 1;
+
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const title = data.get('title')?.toString();
+    const order = parseInt(data.get('order')?.toString() || nextOrder.toString());
+    const content = data.get('content')?.toString();
+
+    if (title && content) {
+      await db.insert(chaptersTable).values({
+        workId,
+        title,
+        content,
+        order,
+        status: 'published' // Default to published for now
+      });
+
+      return Astro.redirect(`/admin/works/${workId}`);
+    } else {
+      error = 'Title and Content are required.';
+    }
+  } catch (e) {
+    error = 'Failed to save chapter.';
+    console.error(e);
+  }
+}
+---
+
+<AdminLayout title={`New Chapter: ${work.title}`} activePage="works">
+  <div style="max-width: 900px;">
+    <div class="form-header">
+      <a href={`/admin/works/${workId}`} class="back-link">&larr; CANCEL & RETURN</a>
+      <h1>New Chapter</h1>
+      <p style="opacity: 0.5;">Writing for: <strong>{work.title}</strong></p>
+    </div>
+
+    {error && (
+      <div style="background: rgba(255, 68, 68, 0.1); color: #ff4444; padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255, 68, 68, 0.2);">
+        {error}
+      </div>
+    )}
+
+    <form class="admin-form" method="POST" id="chapter-form">
+      <input type="hidden" name="content" id="hidden-content" />
+      
+      <div style="display: grid; grid-template-columns: 1fr 120px; gap: 20px;">
+        <div class="form-group">
+          <label for="title">CHAPTER TITLE</label>
+          <input type="text" id="title" name="title" class="form-control" placeholder="e.g. The Beginning of the End" required />
+        </div>
+        <div class="form-group">
+          <label for="order">ORDER</label>
+          <input type="number" id="order" name="order" class="form-control" value={nextOrder} required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>CHAPTER CONTENT</label>
+        <RichTextEditor placeholder="Start writing your story here..." />
+      </div>
+
+      <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
+        <button type="submit" class="btn-primary">PUBLISH CHAPTER</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<style>
+  .form-header { margin-bottom: 50px; }
+  .back-link { font-size: 0.7rem; letter-spacing: 0.1em; opacity: 0.5; text-decoration: none; margin-bottom: 15px; display: block; }
+  .form-header h1 { font-size: 2rem; font-family: var(--font-serif); margin-bottom: 5px; }
+</style>
+
+<script is:inline>
+  const form = document.getElementById('chapter-form');
+  const hiddenInput = document.getElementById('hidden-content');
+
+  form?.addEventListener('submit', (e) => {
+    if (window.quill) {
+      hiddenInput.value = window.quill.root.innerHTML;
+    }
+  });
+</script>

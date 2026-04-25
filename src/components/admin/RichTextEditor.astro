@@ -1,0 +1,126 @@
+---
+interface Props {
+  placeholder?: string;
+  initialValue?: string;
+}
+
+const { placeholder = "Mulai menulis keajaiban...", initialValue = "" } = Astro.props;
+---
+
+<div class="rich-editor-wrapper">
+  <div id="rich-editor" set:html={initialValue}></div>
+</div>
+
+<!-- Quill Library -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script is:inline src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script is:inline>
+  // 1. Register Fonts
+  var Font = Quill.import('formats/font');
+  Font.whitelist = ['outfit', 'playfair', 'serif', 'monospace'];
+  Quill.register(Font, true);
+
+  // 2. FORCE Inline Styles for Size
+  var SizeStyle = Quill.import('attributors/style/size');
+  SizeStyle.whitelist = null; 
+  Quill.register(SizeStyle, true);
+
+  // 3. Initialize Quill
+  var quill = new Quill('#rich-editor', {
+    theme: 'snow',
+    placeholder: 'Mulai menulis keajaiban...',
+    modules: {
+      toolbar: {
+        container: [
+          [{ 'font': ['outfit', 'playfair', 'serif', 'monospace'] }],
+          ['custom-size'],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'align': [] }],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['clean']
+        ],
+        handlers: { 'custom-size': function() {} }
+      }
+    }
+  });
+
+  // 4. Safe Injection for Manual Size Input
+  function setupManualSize() {
+    const sizePlaceholder = document.querySelector('.ql-custom-size');
+    if (!sizePlaceholder) return;
+
+    sizePlaceholder.innerHTML = `
+      <div class="custom-size-wrapper">
+        <input type="number" id="manual-size-input" value="16" min="1" max="200" />
+        <span class="px-label">px</span>
+      </div>
+    `;
+
+    const sizeInput = document.getElementById('manual-size-input');
+
+    sizeInput.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val && val > 0) {
+        quill.format('size', val + 'px');
+      }
+    });
+
+    sizeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = sizeInput.value;
+        if (val && val > 0) {
+          quill.format('size', val + 'px');
+        }
+        e.preventDefault();
+        quill.focus();
+      }
+    });
+
+    sizeInput.addEventListener('mousedown', (e) => e.stopPropagation());
+    sizeInput.addEventListener('click', (e) => e.stopPropagation());
+
+    quill.on('text-change', () => {
+      const range = quill.getSelection();
+      if (range && range.length === 0) {
+        const val = sizeInput.value;
+        if (val && val > 0) {
+          quill.format('size', val + 'px');
+        }
+      }
+    });
+
+    quill.on('selection-change', (range) => {
+      if (range) {
+        if (range.length > 0) {
+          const format = quill.getFormat(range);
+          if (format.size) {
+            sizeInput.value = format.size.replace('px', '');
+          }
+        } else {
+          const val = sizeInput.value;
+          if (val && val > 0) {
+            quill.format('size', val + 'px');
+          }
+        }
+      }
+    });
+  }
+
+  setTimeout(setupManualSize, 100);
+</script>
+
+<style is:global>
+  /* Local overrides for the editor component */
+  .rich-editor-wrapper {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .ql-container.ql-snow {
+    border: none !important;
+    min-height: 400px;
+  }
+</style>

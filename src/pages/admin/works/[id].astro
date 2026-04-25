@@ -1,0 +1,341 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { db } from '@db/index';
+import { works as worksTable, categories as categoryTable, chapters as chaptersTable } from '@schema/index';
+import { eq, asc, count } from 'drizzle-orm';
+
+const { id } = Astro.params;
+const workId = parseInt(id || '0');
+
+// 1. Fetch work details
+const [work] = await db
+  .select({
+    id: worksTable.id,
+    title: worksTable.title,
+    cover: worksTable.cover,
+    synopsis: worksTable.synopsis,
+    status: worksTable.status,
+    type: worksTable.type,
+    categoryName: categoryTable.name,
+    createdAt: worksTable.createdAt
+  })
+  .from(worksTable)
+  .leftJoin(categoryTable, eq(worksTable.categoryId, categoryTable.id))
+  .where(eq(worksTable.id, workId))
+  .limit(1);
+
+if (!work) return Astro.redirect('/admin/works');
+
+// 2. Fetch chapters if it's a book
+let chapters: any[] = [];
+if (work.type === 'book') {
+  chapters = await db
+    .select()
+    .from(chaptersTable)
+    .where(eq(chaptersTable.workId, workId))
+    .orderBy(asc(chaptersTable.order));
+}
+---
+
+<AdminLayout title={`Manage: ${work.title}`} activePage="works">
+  <div class="detail-header-admin">
+    <div class="header-left">
+      <a href="/admin/works" class="back-link">&larr; BACK TO ARCHIVE</a>
+      <h1>{work.title}</h1>
+      <div class="status-row">
+        <span class={`status-badge status-${work.status}`}>{work.status.toUpperCase()}</span>
+        <span class="type-tag">{work.type === 'book' ? '📚 BOOK' : '📄 SINGLE PIECE'}</span>
+        <span class="category-tag">{work.categoryName}</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a href={`/admin/works/${work.id}/edit`} class="btn-secondary" style="text-decoration: none;">EDIT METADATA</a>
+      <button class="btn-primary">PUBLISH WORK</button>
+    </div>
+  </div>
+
+  <div class="detail-grid-admin">
+    <!-- Sidebar Info -->
+    <aside class="info-sidebar">
+      <div class="card-admin cover-card">
+        <img src={work.cover || "https://via.placeholder.com/225x337"} alt={work.title} />
+      </div>
+      
+      <div class="card-admin stats-card">
+        <div class="stat-item">
+          <span class="label">CREATED</span>
+          <span class="value">{new Date(work.createdAt).toLocaleDateString()}</span>
+        </div>
+        {work.type === 'book' && (
+          <div class="stat-item">
+            <span class="label">CHAPTERS</span>
+            <span class="value">{chapters.length}</span>
+          </div>
+        )}
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area-admin">
+      {work.type === 'book' ? (
+        <div class="chapters-management">
+          <div class="section-header-row">
+            <h2>CHAPTER LIST</h2>
+            <a href={`/admin/works/${work.id}/chapters/new`} class="btn-add-chapter">+ ADD NEW CHAPTER</a>
+          </div>
+
+          <div class="chapters-list-admin">
+            {chapters.map((chapter) => (
+              <div class="chapter-admin-card">
+                <div class="ch-info">
+                  <span class="ch-num">CH {chapter.order}</span>
+                  <h3>{chapter.title}</h3>
+                </div>
+                <div class="ch-actions">
+                  <a href={`/admin/works/${work.id}/chapters/${chapter.id}`} class="btn-edit-ch">EDIT</a>
+                  <button class="btn-delete-ch">&times;</button>
+                </div>
+              </div>
+            ))}
+            {chapters.length === 0 && (
+              <div class="empty-state-ch">
+                <p>This book has no chapters yet. Start your story!</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div class="single-piece-management">
+          <div class="section-header-row">
+            <h2>CONTENT PREVIEW</h2>
+            <a href={`/admin/works/${work.id}/edit`} class="btn-add-chapter">EDIT CONTENT</a>
+          </div>
+          <div class="content-preview-box">
+             {work.synopsis && <div class="synopsis-box"><strong>Synopsis:</strong> <p>{work.synopsis}</p></div>}
+             <div class="content-body-admin" style="opacity: 0.5; font-style: italic;">
+               Content editing is available via the "Edit Content" button.
+             </div>
+          </div>
+        </div>
+      )}
+    </main>
+  </div>
+</AdminLayout>
+
+<style>
+  .detail-header-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 50px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 30px;
+  }
+
+  .back-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    text-decoration: none;
+    margin-bottom: 15px;
+    display: block;
+  }
+
+  .detail-header-admin h1 {
+    font-size: 2.5rem;
+    font-family: var(--font-serif);
+    margin-bottom: 15px;
+  }
+
+  .status-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .type-tag, .category-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 15px;
+  }
+
+  .detail-grid-admin {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 50px;
+  }
+
+  .info-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .card-admin {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--glass-border);
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .cover-card {
+    padding: 10px;
+  }
+
+  .cover-card img {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+  }
+
+  .stat-item:last-child { margin-bottom: 0; }
+
+  .stat-item .label {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    opacity: 0.4;
+    font-weight: 700;
+  }
+
+  .stat-item .value {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  /* Content Management */
+  .section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .section-header-row h2 {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+  }
+
+  .btn-add-chapter {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 10px 20px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-add-chapter:hover {
+    background: var(--accent-color);
+    color: #000;
+  }
+
+  .chapters-list-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .chapter-admin-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--glass-border);
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+  }
+
+  .ch-info {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .ch-num {
+    font-size: 0.65rem;
+    font-weight: 800;
+    opacity: 0.3;
+    width: 60px;
+  }
+
+  .ch-info h3 {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .ch-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .btn-edit-ch {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+    opacity: 0.6;
+    text-decoration: none;
+  }
+
+  .btn-edit-ch:hover { opacity: 1; color: var(--accent-color); }
+
+  .btn-delete-ch {
+    font-size: 1.2rem;
+    color: #ff4444;
+    opacity: 0.5;
+  }
+
+  .btn-delete-ch:hover { opacity: 1; }
+
+  .empty-state-ch {
+    text-align: center;
+    padding: 80px 0;
+    opacity: 0.3;
+    border: 1px dashed var(--glass-border);
+    border-radius: 8px;
+  }
+
+  .content-preview-box {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--glass-border);
+    padding: 30px;
+    border-radius: 12px;
+  }
+
+  .synopsis-box {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .synopsis-box strong {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 10px;
+    opacity: 0.4;
+  }
+
+  @media (max-width: 768px) {
+    .detail-grid-admin { grid-template-columns: 1fr; }
+    .detail-header-admin { flex-direction: column; align-items: flex-start; gap: 20px; }
+  }
+</style>

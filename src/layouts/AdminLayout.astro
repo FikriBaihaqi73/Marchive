@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+import '../styles/admin.css';
+
+interface Props {
+  title: string;
+  activePage?: string;
+}
+
+const { title, activePage } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} | Admin Marchive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Mobile Menu Button -->
+  <button id="admin-mobile-toggle" class="admin-mobile-toggle">
+    <span>MENU</span>
+  </button>
+
+  <!-- Sidebar Overlay -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <div class="admin-layout">
+    <aside id="admin-sidebar" class="admin-sidebar">
+      <a href="/admin" class="admin-logo">MARCHIVE ADMIN</a>
+      
+      <nav class="admin-nav">
+        <a href="/admin" class={`admin-nav-link ${activePage === 'dashboard' ? 'active' : ''}`}>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="nav-group-label">Archives</div>
+        <a href="/admin/works" class={`admin-nav-link ${activePage === 'works' || activePage === 'new-work' ? 'active' : ''}`}>
+          <span>Content List</span>
+        </a>
+        
+        <div class="nav-group-label">Organization</div>
+        <a href="/admin/categories" class={`admin-nav-link ${activePage === 'categories' ? 'active' : ''}`}>
+          <span>Categories</span>
+        </a>
+        
+        <div class="nav-group-label">System</div>
+        <a href="/admin/settings" class="admin-nav-link">
+          <span>Settings</span>
+        </a>
+        <a href="/" class="admin-nav-link">
+          <span>View Site</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1>{title}</h1>
+      </header>
+      
+      <slot />
+    </main>
+  </div>
+
+  <script>
+    const toggle = document.getElementById('admin-mobile-toggle');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleMenu() {
+      sidebar?.classList.toggle('open');
+      overlay?.classList.toggle('open');
+    }
+
+    toggle?.addEventListener('click', toggleMenu);
+    overlay?.addEventListener('click', toggleMenu);
+  </script>
+</body>
+</html>
+

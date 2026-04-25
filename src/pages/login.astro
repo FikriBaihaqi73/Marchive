@@ -1,4 +1,49 @@
 ---
+import { db } from '../db';
+import { users } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
+import { createToken } from '../lib/auth';
+
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const identifier = data.get('identifier')?.toString();
+    const passkey = data.get('passkey')?.toString();
+
+    if (identifier && passkey) {
+      // 1. Find user in DB
+      const [user] = await db.select().from(users).where(eq(users.username, identifier)).limit(1);
+
+      if (user) {
+        // 2. Compare password
+        const isValid = await bcrypt.compare(passkey, user.password);
+
+        if (isValid) {
+          // 3. Create Token
+          const token = await createToken({ id: user.id, username: user.username });
+
+          // 4. Set Cookie
+          Astro.cookies.set('marchive_auth_token', token, {
+            path: '/',
+            httpOnly: true,
+            secure: import.meta.env.PROD,
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 24 // 24 hours
+          });
+
+          return Astro.redirect('/admin');
+        }
+      }
+      error = 'INVALID IDENTIFIER OR PASSKEY';
+    }
+  } catch (e) {
+    error = 'SYSTEM ERROR. PLEASE RETRY ACCESS.';
+    console.error(e);
+  }
+}
 ---
 
 <!doctype html>
@@ -26,7 +71,9 @@
           <div class="divider-small"></div>
         </header>
 
-        <form class="login-form">
+        {error && <div class="error-msg" style="color: var(--accent-color); background: rgba(212, 175, 55, 0.05); padding: 12px; border-radius: 4px; margin: 20px 0; font-size: 0.7rem; text-align: center; border: 1px solid rgba(212, 175, 55, 0.2); letter-spacing: 0.1em;">{error}</div>}
+
+        <form class="login-form" method="POST">
           <div class="input-group">
             <label for="identifier">ACCESS IDENTIFIER</label>
             <input type="text" id="identifier" name="identifier" placeholder="Username or Email" required />
@@ -43,6 +90,7 @@
         <a href="/" class="back-to-site">&larr; RETURN TO PUBLIC ARCHIVE</a>
       </div>
     </main>
+
 	</body>
 </html>
 

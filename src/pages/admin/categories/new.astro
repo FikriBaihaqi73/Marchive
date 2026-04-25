@@ -1,0 +1,77 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { db } from '@db/index';
+import { categories as categoryTable } from '@db/schema';
+
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const name = data.get('name')?.toString();
+    const type = data.get('type')?.toString();
+    const slugInput = data.get('slug')?.toString();
+    const description = data.get('description')?.toString();
+
+    if (name && type) {
+      const slug = slugInput || name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+      
+      await db.insert(categoryTable).values({
+        name,
+        type,
+        slug,
+        description
+      });
+
+      return Astro.redirect('/admin/categories');
+    } else {
+      error = 'Name and Type are required.';
+    }
+  } catch (e) {
+    error = 'Failed to create category. Slug might already exist.';
+    console.error(e);
+  }
+}
+---
+
+
+<AdminLayout title="Add New Category" activePage="categories">
+  <div style="max-width: 600px;">
+    {error && (
+      <div style="background: rgba(255, 68, 68, 0.1); color: #ff4444; padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255, 68, 68, 0.2); font-size: 0.85rem;">
+        {error}
+      </div>
+    )}
+
+    <form class="admin-form" method="POST">
+      <div class="form-group">
+        <label for="name">CATEGORY NAME</label>
+        <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Science Fiction" required />
+      </div>
+
+      <div class="form-group">
+        <label for="type">CONTENT TYPE</label>
+        <select id="type" name="type" class="form-control" required>
+          <option value="book">Book / Series (Multi-chapters)</option>
+          <option value="single">Single Piece (Poem, Design, etc.)</option>
+        </select>
+        <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 8px;">This determines where the category appears when creating new content.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="slug">URL SLUG (OPTIONAL)</label>
+        <input type="text" id="slug" name="slug" class="form-control" placeholder="e.g. sci-fi" />
+      </div>
+
+      <div class="form-group">
+        <label for="description">DESCRIPTION</label>
+        <textarea id="description" name="description" class="form-control" rows="3" placeholder="Briefly describe this category..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 40px;">
+        <button type="submit" class="btn-primary">CREATE CATEGORY</button>
+        <a href="/admin/categories" class="btn-primary" style="background: transparent; color: #fff; border: 1px solid var(--glass-border); text-decoration: none;">CANCEL</a>
+      </div>
+    </form>
+  </div>
+</AdminLayout>

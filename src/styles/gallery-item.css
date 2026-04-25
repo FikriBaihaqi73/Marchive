@@ -36,7 +36,7 @@
 }
 
 .content-box {
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -44,10 +44,11 @@
 }
 
 h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin-bottom: 8px;
   color: var(--text-color);
 }
+
 
 .type {
   font-size: 0.75rem;
@@ -67,19 +68,21 @@ h3 {
 
 @media (max-width: 768px) {
   .content-box {
-    padding: 15px;
+    padding: 12px; /* Super compact padding */
   }
   h3 {
-    font-size: 0.85rem;
-    margin-bottom: 5px;
+    font-size: 0.75rem; /* Smaller title */
+    margin-bottom: 4px;
+    line-height: 1.2;
   }
   .type {
-    font-size: 0.6rem;
-    margin-bottom: 10px;
+    font-size: 0.55rem;
+    margin-bottom: 8px; /* Tighter spacing */
   }
   .footer-info {
-    padding-top: 10px;
-    font-size: 0.6rem;
+    padding-top: 8px;
+    font-size: 0.55rem;
   }
 }
+
 
