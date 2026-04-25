@@ -84,3 +84,55 @@ import { works } from '../../data/works';
     .filter-bar { gap: 20px; overflow-x: auto; justify-content: flex-start; }
   }
 </style>
+<script>
+  function initFilters() {
+    const filterButtons = document.querySelectorAll('.filter-item');
+    const galleryItems = document.querySelectorAll('.gallery-item-new');
+
+    function applyFilter(category: string) {
+      const lowerCat = category.toLowerCase();
+      
+      // Update buttons
+      filterButtons.forEach(btn => {
+        if (btn.textContent?.toLowerCase() === lowerCat) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Update items
+      galleryItems.forEach(item => {
+        const itemCat = (item as HTMLElement).dataset.category;
+        if (lowerCat === 'all' || itemCat === lowerCat) {
+          (item as HTMLElement).style.display = 'block';
+          setTimeout(() => (item as HTMLElement).style.opacity = '1', 10);
+        } else {
+          (item as HTMLElement).style.opacity = '0';
+          setTimeout(() => (item as HTMLElement).style.display = 'none', 300);
+        }
+      });
+    }
+
+    // Listen for clicks
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.textContent || 'ALL';
+        applyFilter(cat);
+        // Update URL without refresh
+        const newUrl = cat.toLowerCase() === 'all' ? '/works' : `/works?filter=${cat.toLowerCase()}`;
+        window.history.pushState({}, '', newUrl);
+      });
+    });
+
+    // Check URL params on load
+    const params = new URLSearchParams(window.location.search);
+    const initialFilter = params.get('filter');
+    if (initialFilter) {
+      applyFilter(initialFilter);
+    }
+  }
+
+  // Run on load
+  initFilters();
+</script>

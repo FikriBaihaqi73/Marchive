@@ -14,6 +14,7 @@ const { id, title, category, cover, date = '2024', metadata = '' } = Astro.props
 <a 
   href={`/works/${id}`}
   class="gallery-item-new fade-in" 
+  data-category={category.toLowerCase()}
 >
   <div class="card-inner">
     <div class="image-box">
