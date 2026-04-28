@@ -46,6 +46,16 @@ if (Astro.request.method === 'POST') {
     return Astro.redirect('/admin/works');
   }
 
+  if (action === 'publish-work') {
+    await db.update(worksTable).set({ status: 'published' }).where(eq(worksTable.id, workId));
+    return Astro.redirect(`/admin/works/${workId}`);
+  }
+
+  if (action === 'unpublish-work') {
+    await db.update(worksTable).set({ status: 'draft' }).where(eq(worksTable.id, workId));
+    return Astro.redirect(`/admin/works/${workId}`);
+  }
+
   if (action === 'delete-chapter') {
     const chapterId = parseInt(data.get('chapterId')?.toString() || '0');
     if (chapterId) {
@@ -67,10 +77,22 @@ if (Astro.request.method === 'POST') {
         <span class="text-[0.65rem] tracking-[0.1em] font-bold opacity-60 uppercase">{work.categoryName}</span>
       </div>
     </div>
-    <div class="flex gap-[15px] flex-wrap">
+    <div class="flex gap-[15px] flex-wrap items-center">
       <a href={`/admin/works/${work.id}/edit`} class="bg-white/5 text-white border border-glass-border px-5 py-3 rounded-lg font-bold text-[0.8rem] no-underline hover:bg-white/10 transition-all">EDIT METADATA</a>
-      <button class="bg-accent text-black px-5 py-3 rounded-lg font-bold text-[0.8rem] hover:scale-105 transition-all">PUBLISH WORK</button>
-      <button type="button" class="bg-transparent text-red-500 border border-red-500 px-5 py-3 rounded-lg font-bold text-[0.8rem] hover:bg-red-500 hover:text-black transition-all" id="delete-work-btn">DELETE WORK</button>
+      
+      {work.status === 'draft' ? (
+        <form method="POST" class="contents">
+          <input type="hidden" name="action" value="publish-work" />
+          <button type="submit" class="bg-accent text-black px-5 py-3 rounded-lg font-bold text-[0.8rem] hover:scale-105 transition-all cursor-pointer">PUBLISH WORK</button>
+        </form>
+      ) : (
+        <form method="POST" class="contents">
+          <input type="hidden" name="action" value="unpublish-work" />
+          <button type="submit" class="bg-white/10 text-white border border-white/20 px-5 py-3 rounded-lg font-bold text-[0.8rem] hover:bg-white/20 transition-all cursor-pointer">SET TO DRAFT</button>
+        </form>
+      )}
+
+      <button type="button" class="bg-transparent text-red-500 border border-red-500 px-5 py-3 rounded-lg font-bold text-[0.8rem] hover:bg-red-500 hover:text-black transition-all cursor-pointer" id="delete-work-btn">DELETE WORK</button>
     </div>
   </div>
 

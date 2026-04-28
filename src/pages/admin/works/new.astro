@@ -45,7 +45,7 @@ if (Astro.request.method === 'POST') {
           cover: coverUrl,
           synopsis: isSingle ? null : synopsis,
           content: isSingle ? content : null,
-          status: 'draft', // Default to draft
+          status: isSingle ? 'published' : 'draft', 
         }).returning();
 
         return Astro.redirect('/admin/works');
