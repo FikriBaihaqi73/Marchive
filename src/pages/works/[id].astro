@@ -72,8 +72,8 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
         <div class="text-[0.8rem] tracking-[0.3em] opacity-50 fade-in uppercase">{formattedDate}</div>
       </header>
 
-      <div class="fade-in">
-        <img src={work.cover || "https://via.placeholder.com/600x800"} alt={work.title} class="w-full aspect-square object-cover border border-glass-border" />
+      <div class="fade-in flex justify-center lg:justify-start">
+        <img src={work.cover || "https://via.placeholder.com/600x800"} alt={work.title} class="w-full max-w-[400px] aspect-[2/3] object-cover border border-glass-border shadow-2xl" />
       </div>
 
       <div class="fade-in">
