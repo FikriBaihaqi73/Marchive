@@ -9,7 +9,7 @@ const isActive = (path: string) => pathname === path || (path !== '/' && pathnam
     
     <div 
       id="nav-links"
-      class="nav-links fixed top-0 left-0 w-full h-screen bg-[#0a0a0ad9] backdrop-blur-[30px] flex flex-col justify-center items-center gap-10 z-[998] opacity-0 invisible translate-x-full pointer-events-none transition-all duration-600 cubic-bezier-[0.16,1,0.3,1] lg:static lg:w-auto lg:h-auto lg:bg-transparent lg:backdrop-blur-none lg:flex-row lg:opacity-100 lg:visible lg:translate-x-0 lg:pointer-events-auto lg:z-auto lg:left-1/2 lg:absolute lg:-translate-x-1/2 [&.open]:opacity-100 [&.open]:visible [&.open]:translate-x-0 [&.open]:pointer-events-auto [&.open]_a:opacity-100 [&.open]_a:translate-y-0"
+      class="nav-links"
     >
       {[
         { href: '/', label: 'HOME' },
@@ -19,7 +19,7 @@ const isActive = (path: string) => pathname === path || (path !== '/' && pathnam
       ].map((link, i) => (
         <a 
           href={link.href} 
-          class={`text-[0.75rem] font-medium tracking-[0.15em] transition-all duration-300 lg:text-[0.75rem] lg:font-medium lg:opacity-50 hover:opacity-100 lg:hover:text-accent max-lg:text-[2rem] max-lg:font-serif max-lg:opacity-0 max-lg:translate-y-[30px] max-lg:transition-[transform,opacity] max-lg:duration-500 ${isActive(link.href) ? 'max-lg:!opacity-100 max-lg:!translate-y-0 opacity-100! text-accent! drop-shadow-[0_0_10px_rgba(197,160,89,0.3)]' : ''}`}
+          class={`nav-item ${isActive(link.href) ? 'active' : ''}`}
           style={`transition-delay: ${0.2 + i * 0.1}s`}
         >
           {link.label}
@@ -39,6 +39,94 @@ const isActive = (path: string) => pathname === path || (path !== '/' && pathnam
   </div>
 </nav>
 
+<style is:global>
+  @reference "../styles/global.css";
+
+  .nav-links {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(30px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(100%);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .nav-links.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .nav-item {
+    font-size: 2rem;
+    font-family: var(--font-serif);
+    color: white;
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: transform 0.5s, opacity 0.5s;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-links.open .nav-item {
+    opacity: 0.5;
+    transform: translateY(0);
+  }
+
+  .nav-links.open .nav-item:hover,
+  .nav-links.open .nav-item.active {
+    opacity: 1;
+    color: var(--accent-color);
+  }
+
+  @media (min-width: 1024px) {
+    .nav-links {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: auto;
+      height: auto;
+      background: transparent;
+      backdrop-filter: none;
+      flex-direction: row;
+      gap: 30px;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: auto;
+    }
+
+    .nav-item {
+      font-size: 0.75rem;
+      font-family: var(--font-sans);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0.5;
+      transform: none;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      opacity: 1;
+      color: var(--accent-color);
+    }
+  }
+</style>
 
 <script src="../scripts/navbar.ts"></script>
 

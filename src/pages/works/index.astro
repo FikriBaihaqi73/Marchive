@@ -27,11 +27,11 @@ const allWorks = await db
 
 
 <Layout>
-  <main class="pt-[180px] max-lg:pt-[120px] pb-[120px] container">
-    <header class="mb-20 text-center">
-      <div class="flex items-center gap-[15px] justify-center text-[0.9rem] font-medium mb-5">ARCHIVE</div>
-      <h1 class="text-[3rem] lg:text-[5rem] mb-5 tracking-[0.1em]">ALL WORKS</h1>
-      <p class="text-[0.9rem] tracking-[0.2em] uppercase opacity-60">Exploration of thoughts, literature, and visual arts.</p>
+  <main class="pt-[150px] max-lg:pt-[100px] pb-[120px] container">
+    <header class="mb-[80px] max-md:mb-[50px] text-center">
+      <div class="flex items-center gap-[15px] justify-center text-[0.8rem] font-medium mb-4 opacity-50">ARCHIVE</div>
+      <h1 class="text-[2.8rem] lg:text-[5rem] mb-4 tracking-[0.05em] uppercase font-serif">All Works</h1>
+      <p class="text-[0.7rem] lg:text-[0.9rem] tracking-[0.2em] uppercase opacity-50 max-w-[400px] mx-auto leading-relaxed">Exploration of thoughts, literature, and visual arts.</p>
     </header>
 
     <!-- Desktop Filter Bar -->
@@ -44,7 +44,7 @@ const allWorks = await db
 
     <!-- Mobile Floating Filter -->
     <div class="lg:hidden mb-10 relative">
-      <button id="mobile-filter-trigger" class="flex items-center justify-center gap-3 bg-white/3 border border-glass-border p-[12px_20px] w-auto mx-auto text-white text-[0.65rem] tracking-[0.2em] font-bold">
+      <button id="mobile-filter-trigger" class="flex items-center justify-center gap-3 bg-white/3 border border-glass-border p-[12px_20px] w-auto mx-auto text-white text-[0.6rem] tracking-[0.2em] font-bold">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-accent"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
         <span>FILTER ARCHIVE</span>
       </button>
@@ -58,9 +58,9 @@ const allWorks = await db
           <button id="close-filter" class="text-2xl leading-none opacity-50">&times;</button>
         </div>
         <div class="grid grid-cols-2 gap-2.5">
-          <button class="mobile-opt p-[15px] bg-white/2 border border-white/5 text-[0.65rem] text-center transition-all duration-300 [&.active]:bg-accent [&.active]:text-black" data-category="ALL">ALL</button>
+          <button class="mobile-opt p-[15px] bg-white/2 border border-white/5 text-[0.6rem] tracking-widest text-center transition-all duration-300 [&.active]:bg-accent [&.active]:text-black" data-category="ALL">ALL</button>
           {dbCategories.map(cat => (
-            <button class="mobile-opt p-[15px] bg-white/2 border border-white/5 text-[0.65rem] text-center transition-all duration-300 [&.active]:bg-accent [&.active]:text-black" data-category={cat.name.toUpperCase()}>{cat.name.toUpperCase()}</button>
+            <button class="mobile-opt p-[15px] bg-white/2 border border-white/5 text-[0.6rem] tracking-widest text-center transition-all duration-300 [&.active]:bg-accent [&.active]:text-black" data-category={cat.name.toUpperCase()}>{cat.name.toUpperCase()}</button>
           ))}
         </div>
       </div>
@@ -98,7 +98,8 @@ const allWorks = await db
       
       // Update UI
       [...opts, ...desktopBtns].forEach(btn => {
-        if ((btn as HTMLElement).dataset.category === cat) {
+        const btnCat = (btn as HTMLElement).dataset.category || '';
+        if (btnCat.toLowerCase() === lowerCat) {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
@@ -110,8 +111,10 @@ const allWorks = await db
         const itemCat = (item as HTMLElement).dataset.category;
         if (lowerCat === 'all' || itemCat === lowerCat) {
           (item as HTMLElement).style.display = 'block';
+          setTimeout(() => (item as HTMLElement).style.opacity = '1', 10);
         } else {
-          (item as HTMLElement).style.display = 'none';
+          (item as HTMLElement).style.opacity = '0';
+          setTimeout(() => (item as HTMLElement).style.display = 'none', 300);
         }
       });
 
@@ -143,62 +146,10 @@ const allWorks = await db
     const params = new URLSearchParams(window.location.search);
     const initialFilter = params.get('filter');
     if (initialFilter) {
-      applyFilter(initialFilter.toUpperCase(), false);
-    }
-  }
-
-  initWorksFilters();
-</script>
-
-<script>
-  function initFilters() {
-    const filterButtons = document.querySelectorAll('.filter-item');
-    const galleryItems = document.querySelectorAll('.gallery-item-new');
-
-    function applyFilter(category: string) {
-      const lowerCat = category.toLowerCase();
-      
-      // Update buttons
-      filterButtons.forEach(btn => {
-        if (btn.textContent?.toLowerCase() === lowerCat) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-
-      // Update items
-      galleryItems.forEach(item => {
-        const itemCat = (item as HTMLElement).dataset.category;
-        if (lowerCat === 'all' || itemCat === lowerCat) {
-          (item as HTMLElement).style.display = 'block';
-          setTimeout(() => (item as HTMLElement).style.opacity = '1', 10);
-        } else {
-          (item as HTMLElement).style.opacity = '0';
-          setTimeout(() => (item as HTMLElement).style.display = 'none', 300);
-        }
-      });
-    }
-
-    // Listen for clicks
-    filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const cat = btn.textContent || 'ALL';
-        applyFilter(cat);
-        // Update URL without refresh
-        const newUrl = cat.toLowerCase() === 'all' ? '/works' : `/works?filter=${cat.toLowerCase()}`;
-        window.history.pushState({}, '', newUrl);
-      });
-    });
-
-    // Check URL params on load
-    const params = new URLSearchParams(window.location.search);
-    const initialFilter = params.get('filter');
-    if (initialFilter) {
-      applyFilter(initialFilter);
+      applyFilter(initialFilter, false);
     }
   }
 
   // Run on load
-  initFilters();
+  initWorksFilters();
 </script>

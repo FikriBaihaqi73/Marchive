@@ -304,23 +304,43 @@ const featuredWorks = await db
     .subtitle {
       margin: 0 auto;
     }
-    .slides-inner { height: auto; min-height: 350px; }
-    .image-link-wrap { width: 100%; }
-    .slider-controls-ui { width: 100%; }
+    .slides-inner { 
+      height: 420px; 
+    }
+    .image-link-wrap { 
+      width: 100%; 
+      margin-left: 0;
+    }
+    .slide-caption {
+      width: 100%;
+      margin-left: 0;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .slider-controls-ui { 
+      width: 100%; 
+    }
     .arrows-wrap { 
       top: auto;
-      bottom: -60px;
+      bottom: -40px;
       left: 50%;
       right: auto;
       transform: translateX(-50%);
-      width: 150px;
+      width: 120px;
       pointer-events: auto;
+    }
+    .work-title {
+      font-size: 1.2rem;
     }
   }
 
   @media (max-width: 480px) {
+    .hero-hybrid {
+      padding-top: 100px;
+    }
     .hero-static h1 { font-size: 3rem; }
-    .slides-inner { min-height: 280px; }
+    .slides-inner { height: 380px; }
+    .hero-grid { gap: 40px; }
   }
 </style>
 

@@ -33,49 +33,56 @@ const categorizedWorks = await Promise.all(dbCategories.map(async (cat) => {
 
 
 <Layout>
-  <main class="pt-[180px] max-md:pt-[120px] pb-[150px] container">
-    <header class="text-center mb-[100px] max-md:mb-[60px]">
-      <div class="flex items-center gap-[15px] justify-center text-[0.9rem] font-medium mb-5">03</div>
-      <h1 class="text-[3rem] lg:text-[5rem] tracking-[0.1em] fade-in">COLLECTIONS</h1>
-      <p class="text-[0.9rem] tracking-[0.3em] opacity-50 uppercase fade-in">Browse the archive by creative chambers.</p>
+  <main class="pt-[150px] max-md:pt-[100px] pb-[120px] container">
+    <header class="text-center mb-[80px] max-md:mb-[50px]">
+      <div class="flex items-center gap-[15px] justify-center text-[0.8rem] font-medium mb-4 opacity-50">03</div>
+      <h1 class="text-[2.8rem] lg:text-[5rem] tracking-[0.05em] fade-in uppercase font-serif">Collections</h1>
+      <p class="text-[0.7rem] lg:text-[0.9rem] tracking-[0.2em] opacity-50 uppercase fade-in max-w-[300px] mx-auto leading-relaxed">Browse the archive by creative chambers.</p>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-[60px] lg:gap-x-[60px] lg:gap-y-[100px]">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-[60px] lg:gap-x-[80px] lg:gap-y-[120px]">
       {categorizedWorks.map((cat) => (
-        <a href={`/works?filter=${cat.name.toLowerCase()}`} class="group block no-underline text-inherit transition-transform duration-400 hover:-translate-y-2.5 fade-in">
-          <div class="relative w-full aspect-[4/3] bg-white/2 border border-glass-border overflow-hidden mb-[30px]">
+        <a href={`/works?filter=${cat.name.toLowerCase()}`} class="group block no-underline text-inherit transition-all duration-400 fade-in">
+          <div class="relative w-full aspect-[4/3] bg-white/2 border border-glass-border overflow-hidden mb-[25px]">
             {/* Collage stack Effect */}
-            <div class="relative w-full h-full p-10 max-md:p-5 flex items-center justify-center">
+            <div class="relative w-full h-full flex items-center justify-center p-10">
               {cat.covers.map((cover, idx) => (
-                <div class={`absolute w-1/2 aspect-[3/4] bg-[#111] border border-white/10 shadow-[10px_10px_30px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-500 cubic-bezier-[0.4,0,0.2,1] 
+                <div class={`absolute w-[45%] aspect-[3/4] bg-[#111] border border-white/10 shadow-[20px_20px_40px_rgba(0,0,0,0.6)] overflow-hidden transition-all duration-700 cubic-bezier-[0.23,1,0.32,1] 
                   ${idx === 0 ? 'z-[3] -rotate-2 group-hover:rotate-0' : ''}
-                  ${idx === 1 ? 'z-[2] translate-x-[30%] translate-y-[15%] rotate-[5deg] opacity-80 group-hover:translate-x-[45%] group-hover:translate-y-[25%] group-hover:rotate-[10deg]' : ''}
-                  ${idx === 2 ? 'z-[1] -translate-x-[30%] -translate-y-[15%] -rotate-[8deg] opacity-60 group-hover:-translate-x-[45%] group-hover:-translate-y-[25%] group-hover:-rotate-[15deg]' : ''}
+                  ${idx === 1 ? 'z-[2] translate-x-[25%] translate-y-[10%] rotate-[6deg] opacity-80 group-hover:translate-x-[40%] group-hover:translate-y-[20%] group-hover:rotate-[12deg]' : ''}
+                  ${idx === 2 ? 'z-[1] -translate-x-[25%] -translate-y-[10%] -rotate-[10deg] opacity-60 group-hover:-translate-x-[40%] group-hover:-translate-y-[20%] group-hover:-rotate-[18deg]' : ''}
                 `}>
-                  <img src={cover} alt="" class="w-full h-full object-cover" />
+                  <img src={cover} alt="" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 </div>
               ))}
-              {/* Fallback pattern if only 1-2 covers exist */}
-              {cat.covers.length < 3 && (
-                <div class="absolute w-1/2 aspect-[3/4] bg-accent z-0 flex items-center justify-center">
-                  <span class="text-[0.6rem] text-black font-black tracking-[0.2em] -rotate-90">MARCHIVE</span>
+              {/* Fallback pattern if empty */}
+              {cat.covers.length === 0 && (
+                <div class="w-1/3 aspect-[3/4] border border-white/10 bg-white/5 flex items-center justify-center">
+                   <span class="text-[0.6rem] opacity-20 tracking-widest">EMPTY</span>
                 </div>
               )}
             </div>
             
-            <div class="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center opacity-0 transition-opacity duration-400 backdrop-blur-[2px] z-10 group-hover:opacity-100">
-              <span class="text-[0.75rem] font-bold tracking-[0.2em] bg-accent text-black p-[12px_24px]">EXPLORE ROOM &rarr;</span>
+            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 transition-all duration-400 backdrop-blur-[4px] z-10 group-hover:opacity-100">
+              <span class="text-[0.7rem] font-bold tracking-[0.2em] bg-white text-black p-[12px_24px] translate-y-4 transition-transform group-hover:translate-y-0">EXPLORE ROOM &rarr;</span>
             </div>
           </div>
           
-          <div>
-            <div class="flex justify-between items-baseline mb-2.5">
-              <h2 class="text-[1.8rem] font-serif tracking-[0.05em]">{cat.name}</h2>
-              <span class="text-[0.7rem] opacity-40 font-bold tracking-[0.1em]">{cat.count} {cat.count > 1 ? 'WORKS' : 'WORK'}</span>
+          <div class="px-2">
+            <div class="flex justify-between items-baseline mb-3">
+              <h2 class="text-[1.5rem] lg:text-[1.8rem] font-serif tracking-[0.05em] uppercase">{cat.name}</h2>
+              <span class="text-[0.65rem] opacity-40 font-bold tracking-[0.1em]">{cat.count} {cat.count > 1 ? 'ITEMS' : 'ITEM'}</span>
             </div>
-            <div class="w-10 h-[1px] bg-accent transition-all duration-400 group-hover:w-full"></div>
+            <div class="w-full h-[1px] bg-white/10 relative overflow-hidden">
+              <div class="absolute top-0 left-0 h-full w-0 bg-accent transition-all duration-500 group-hover:w-full"></div>
+            </div>
           </div>
         </a>
       ))}
     </div>
   </main>
+</Layout>
+
+<style>
+  @reference "../styles/global.css";
+</style>
