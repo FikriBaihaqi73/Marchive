@@ -4,6 +4,7 @@ import { db } from '@db/index';
 import { categories as categoryTable, works as worksTable } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import RichTextEditor from '../../../components/admin/RichTextEditor.astro';
+import { uploadImage } from '../../../lib/cloudinary';
 
 const type = Astro.url.searchParams.get('type') || 'book';
 const isSingle = type === 'single';
@@ -16,25 +17,39 @@ if (Astro.request.method === 'POST') {
     const data = await Astro.request.formData();
     const title = data.get('title')?.toString();
     const categoryId = parseInt(data.get('categoryId')?.toString() || '0');
-    const cover = data.get('cover')?.toString();
+    const coverFile = data.get('cover') as File;
     const synopsis = data.get('synopsis')?.toString();
     const content = data.get('content')?.toString(); // Content from Rich Text Editor
 
     if (title && categoryId) {
-      const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+      let coverUrl = '';
       
-      const [newWork] = await db.insert(worksTable).values({
-        title,
-        slug,
-        categoryId,
-        type: isSingle ? 'single' : 'book',
-        cover,
-        synopsis: isSingle ? null : synopsis,
-        content: isSingle ? content : null,
-        status: 'draft', // Default to draft
-      }).returning();
+      // Upload to Cloudinary if file exists
+      if (coverFile && coverFile.size > 0) {
+        try {
+          coverUrl = await uploadImage(coverFile, 'marchive/covers');
+        } catch (uploadErr) {
+          console.error('Upload Error:', uploadErr);
+          error = 'Failed to upload image. Please check your Cloudinary config.';
+        }
+      }
 
-      return Astro.redirect('/admin/works');
+      if (!error) {
+        const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+        
+        const [newWork] = await db.insert(worksTable).values({
+          title,
+          slug,
+          categoryId,
+          type: isSingle ? 'single' : 'book',
+          cover: coverUrl,
+          synopsis: isSingle ? null : synopsis,
+          content: isSingle ? content : null,
+          status: 'draft', // Default to draft
+        }).returning();
+
+        return Astro.redirect('/admin/works');
+      }
     } else {
       error = 'Title and Category are required.';
     }
@@ -57,7 +72,7 @@ const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 
       </div>
     )}
 
-    <form class="flex flex-col gap-6" method="POST" id="main-form">
+    <form class="flex flex-col gap-6" method="POST" id="main-form" enctype="multipart/form-data">
       <!-- Hidden input for Rich Text content -->
       <input type="hidden" name="content" id="hidden-content" />
       
@@ -96,12 +111,17 @@ const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="cover" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">COVER / THUMBNAIL IMAGE URL</label>
-        <input type="text" id="cover" name="cover" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all placeholder:opacity-20" placeholder="https://image-link.com/cover.jpg" />
+        <label for="cover" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">COVER IMAGE (UPLOAD TO CLOUDINARY)</label>
+        <div class="relative group">
+          <input type="file" id="cover" name="cover" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="const name = this.files[0]?.name; if(name) document.getElementById('file-name').textContent = name;" />
+          <div class="bg-white/5 border border-white/10 border-dashed rounded-lg p-[30px] text-center transition-all group-hover:border-accent/50 group-hover:bg-white/10">
+            <span id="file-name" class="text-[0.9rem] opacity-40 tracking-[0.1em]">CLICK TO SELECT OR DRAG IMAGE HERE</span>
+          </div>
+        </div>
       </div>
 
       <div class="flex gap-5 items-center mt-10 pt-[30px] border-t border-white/5">
-        <button type="submit" class="bg-accent text-black px-10 py-4 rounded-lg font-bold text-[0.85rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer" id="submit-btn">
+        <button type="submit" class="bg-accent text-black px-10 py-4 rounded-lg font-bold text-[0.85rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-wait" id="submit-btn">
           {isSingle ? "PUBLISH PIECE" : "CREATE BOOK"}
         </button>
         <a href="/admin/works" class="text-white opacity-50 no-underline text-[0.8rem] hover:opacity-100 hover:text-accent transition-all">Cancel</a>
@@ -125,7 +145,14 @@ const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 
     const hiddenInput = document.getElementById('hidden-content');
 
     form?.addEventListener('submit', (e) => {
-      // Access global Quill instance (defined in RichTextEditor component)
+      // 2. Disable button to show loading
+      const btn = document.getElementById('submit-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'UPLOADING...';
+      }
+
+      // 3. Access global Quill instance (defined in RichTextEditor component)
       if (window.quill) {
         hiddenInput.value = window.quill.root.innerHTML;
         console.log('Syncing content:', hiddenInput.value);

@@ -4,6 +4,7 @@ import RichTextEditor from '@components/admin/RichTextEditor.astro';
 import { db } from '@db/index';
 import { works as worksTable, categories as categoryTable } from '@schema/index';
 import { eq } from 'drizzle-orm';
+import { uploadImage } from '../../../../lib/cloudinary';
 
 const { id } = Astro.params;
 const workId = parseInt(id || '0');
@@ -32,22 +33,39 @@ if (Astro.request.method === 'POST') {
 
     const title = data.get('title')?.toString();
     const categoryId = parseInt(data.get('categoryId')?.toString() || '0');
-    const cover = data.get('cover')?.toString();
+    const coverFile = data.get('cover') as File;
     const synopsis = data.get('synopsis')?.toString();
     const content = data.get('content')?.toString();
 
     if (title && categoryId) {
-      await db.update(worksTable)
-        .set({ 
-          title, 
-          categoryId, 
-          cover, 
-          synopsis: work.type === 'book' ? synopsis : null,
-          content: work.type === 'single' ? content : null
-        })
-        .where(eq(worksTable.id, workId));
+      let coverUrl = work.cover; // Default to existing
+      
+      // Upload new file if provided
+      if (coverFile && coverFile.size > 0) {
+        try {
+          coverUrl = await uploadImage(coverFile, 'marchive/covers');
+        } catch (uploadErr) {
+          console.error('Upload Error:', uploadErr);
+          error = 'Failed to upload image. Please check your Cloudinary config.';
+        }
+      }
 
-      success = 'Work updated successfully!';
+      if (!error) {
+        await db.update(worksTable)
+          .set({ 
+            title, 
+            categoryId, 
+            cover: coverUrl, 
+            synopsis: work.type === 'book' ? synopsis : null,
+            content: work.type === 'single' ? content : null
+          })
+          .where(eq(worksTable.id, workId));
+
+        // Refetch to show updated data
+        const [updatedWork] = await db.select().from(worksTable).where(eq(worksTable.id, workId)).limit(1);
+        Object.assign(work, updatedWork);
+        success = 'Work updated successfully!';
+      }
     } else {
       error = 'Title and Category are required.';
     }
@@ -71,7 +89,7 @@ const isSingle = work.type === 'single';
     {error && <div class="bg-red-500/10 text-red-500 p-[15px] rounded-lg mb-[30px] border border-red-500/20 text-[0.85rem]">{error}</div>}
     {success && <div class="bg-green-500/10 text-green-400 p-[15px] rounded-lg mb-[30px] border border-green-500/20 text-[0.85rem]">{success}</div>}
 
-    <form class="flex flex-col gap-6" method="POST" id="edit-work-form">
+    <form class="flex flex-col gap-6" method="POST" id="edit-work-form" enctype="multipart/form-data">
       <input type="hidden" name="content" id="hidden-content" />
       <input type="hidden" name="action" id="form-action" value="update" />
 
@@ -90,8 +108,24 @@ const isSingle = work.type === 'single';
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="cover" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">COVER IMAGE URL</label>
-        <input type="text" id="cover" name="cover" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all" value={work.cover || ''} placeholder="https://image-link.com/photo.jpg" />
+        <label for="cover" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">COVER IMAGE (LEAVE EMPTY TO KEEP CURRENT)</label>
+        
+        {work.cover && (
+          <div class="mb-2 flex items-center gap-4 p-3 bg-white/5 rounded-lg border border-white/5">
+            <img src={work.cover} class="w-12 h-16 object-cover rounded-md" alt="Current cover" />
+            <div class="overflow-hidden">
+              <p class="text-[0.6rem] opacity-30 uppercase tracking-widest">Current Image</p>
+              <p class="text-[0.75rem] opacity-60 truncate">{work.cover}</p>
+            </div>
+          </div>
+        )}
+
+        <div class="relative group">
+          <input type="file" id="cover" name="cover" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="const name = this.files[0]?.name; if(name) document.getElementById('file-name').textContent = name;" />
+          <div class="bg-white/5 border border-white/10 border-dashed rounded-lg p-[20px] text-center transition-all group-hover:border-accent/50 group-hover:bg-white/10">
+            <span id="file-name" class="text-[0.8rem] opacity-40 tracking-[0.1em]">SELECT NEW IMAGE TO REPLACE</span>
+          </div>
+        </div>
       </div>
 
       {isSingle ? (
@@ -107,7 +141,7 @@ const isSingle = work.type === 'single';
       )}
 
       <div class="mt-10 pt-[30px] border-t border-white/5 flex gap-[15px]">
-        <button type="submit" class="bg-accent text-black px-8 py-4 rounded-lg font-bold text-[0.8rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer">SAVE ALL CHANGES</button>
+        <button type="submit" class="bg-accent text-black px-8 py-4 rounded-lg font-bold text-[0.8rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-wait" id="submit-btn">SAVE ALL CHANGES</button>
         <button type="button" class="bg-transparent text-red-500 border border-red-500 px-8 py-4 rounded-lg font-bold text-[0.8rem] tracking-[0.1em] hover:bg-red-500 hover:text-black transition-all cursor-pointer" id="delete-btn">DELETE WORK</button>
       </div>
     </form>
@@ -120,6 +154,13 @@ const isSingle = work.type === 'single';
   const actionInput = document.getElementById('form-action');
 
   form?.addEventListener('submit', (e) => {
+    // Disable button to show loading
+    const btn = document.getElementById('submit-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = 'SAVING...';
+    }
+
     if (window.quill) {
       hiddenInput.value = window.quill.root.innerHTML;
     }
