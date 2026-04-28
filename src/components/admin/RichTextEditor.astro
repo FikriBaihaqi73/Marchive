@@ -111,16 +111,121 @@ const { placeholder = "Mulai menulis keajaiban...", initialValue = "" } = Astro.
 </script>
 
 <style is:global>
-  /* Local overrides for the editor component */
+  @reference "../../styles/global.css";
+
   .rich-editor-wrapper {
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* Toolbar Styling */
+  .ql-toolbar.ql-snow {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 12px 20px !important;
+  }
+
+  .ql-snow .ql-stroke {
+    stroke: rgba(255, 255, 255, 0.5) !important;
+  }
+  .ql-snow .ql-fill {
+    fill: rgba(255, 255, 255, 0.5) !important;
+  }
+  .ql-snow .ql-picker {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .ql-snow.ql-toolbar button:hover .ql-stroke,
+  .ql-snow.ql-toolbar button.ql-active .ql-stroke {
+    stroke: var(--color-accent) !important;
   }
   
+  .ql-snow.ql-toolbar button:hover .ql-fill,
+  .ql-snow.ql-toolbar button.ql-active .ql-fill {
+    fill: var(--color-accent) !important;
+  }
+
+  .ql-snow.ql-toolbar .ql-picker-label:hover,
+  .ql-snow.ql-toolbar .ql-picker-label.ql-active {
+    color: var(--color-accent) !important;
+  }
+
+  /* Custom Font Size Input */
+  .ql-custom-size {
+    width: auto !important;
+    padding: 0 10px !important;
+  }
+
+  .custom-size-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  #manual-size-input {
+    background: transparent;
+    border: none;
+    color: var(--color-accent);
+    width: 35px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 0;
+    outline: none;
+  }
+
+  .px-label {
+    font-size: 0.65rem;
+    opacity: 0.4;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Editor Container */
   .ql-container.ql-snow {
     border: none !important;
+    font-family: inherit !important;
+    font-size: 1.1rem;
+    color: #e0e0e0;
+  }
+
+  .ql-editor {
     min-height: 400px;
+    padding: 40px !important;
+    line-height: 1.8;
+  }
+
+  .ql-editor.ql-blank::before {
+    color: rgba(255, 255, 255, 0.15) !important;
+    font-style: normal !important;
+    left: 40px !important;
+  }
+
+  /* Pickers (Dropdowns) */
+  .ql-snow .ql-picker-options {
+    background-color: #1a1a1a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    padding: 10px !important;
+    border-radius: 8px;
+  }
+
+  .ql-snow .ql-picker-item {
+    color: rgba(255, 255, 255, 0.5) !important;
+    padding: 5px 10px !important;
+  }
+
+  .ql-snow .ql-picker-item:hover,
+  .ql-snow .ql-picker-item.ql-selected {
+    color: var(--color-accent) !important;
+    background: rgba(255, 255, 255, 0.05);
   }
 </style>

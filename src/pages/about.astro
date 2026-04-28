@@ -1,52 +1,74 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import { db } from '@db/index';
+import { works, chapters, categories } from '@schema/index';
+import { count } from 'drizzle-orm';
+
+const [worksCount] = await db.select({ value: count() }).from(works);
+const [chaptersCount] = await db.select({ value: count() }).from(chapters);
+const [categoriesCount] = await db.select({ value: count() }).from(categories);
+
+const stats = [
+  { label: 'ARCHIVED WORKS', value: worksCount.value },
+  { label: 'TOTAL CHAPTERS', value: chaptersCount.value },
+  { label: 'CATEGORIES', value: categoriesCount.value },
+];
 ---
 
 <Layout>
   <main class="about-page container">
     <header class="about-header">
-      <div class="section-num">04</div>
+      <div class="section-num text-center justify-center">04</div>
       <h1 class="fade-in">ABOUT MARCHIVE</h1>
     </header>
 
     <section class="about-content">
       <div class="intro-grid">
-        <div class="main-text fade-in">
-          <p class="large-text">Marchive adalah ruang arsip digital tempat beragam karya dikumpulkan, disusun, dan dibagikan.</p>
-          <p>Lahir dari keinginan untuk mengabadikan setiap jejak pemikiran, Marchive menjadi rumah bagi tulisan, puisi, hingga eksplorasi desain. Di sini, setiap karya bukan sekadar data, melainkan bagian dari perjalanan panjang dalam berpikir dan berkarya.</p>
+        <div class="fade-in">
+          <p class="intro-lead">Marchive adalah ruang arsip digital tempat beragam karya dikumpulkan, disusun, dan dibagikan.</p>
+          <p class="intro-text">Lahir dari keinginan untuk mengabadikan setiap jejak pemikiran, Marchive menjadi rumah bagi tulisan, puisi, hingga eksplorasi desain. Di sini, setiap karya bukan sekadar data, melainkan bagian dari perjalanan panjang dalam berpikir dan berkarya.</p>
           
-          <div class="philosophy-box">
+          <div class="philosophy-section">
             <h3>PHILOSOPHY</h3>
             <p>“We don't just create. We preserve what matters.”</p>
           </div>
         </div>
-        <div class="image-side fade-in">
-          <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=1000" alt="Archway Architecture" class="main-img" />
+        <div class="fade-in">
+          <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=1000" alt="Archway Architecture" class="about-main-img" />
         </div>
       </div>
 
-      <div class="details-grid fade-in">
-        <div class="detail-item">
-          <span>01</span>
+      <div class="core-pillars fade-in">
+        <div class="pillar-item">
+          <span class="num">01</span>
           <h4>COLLECT</h4>
           <p>Menghimpun fragmen ide yang berserakan menjadi satu kesatuan yang kohesif.</p>
         </div>
-        <div class="detail-item">
-          <span>02</span>
+        <div class="pillar-item">
+          <span class="num">02</span>
           <h4>CURATE</h4>
           <p>Memilih dan memilah setiap elemen untuk memastikan kualitas dan pesan yang disampaikan.</p>
         </div>
-        <div class="detail-item">
-          <span>03</span>
+        <div class="pillar-item">
+          <span class="num">03</span>
           <h4>ARCHIVE</h4>
           <p>Mengabadikan setiap karya agar tetap relevan dan dapat dinikmati melampaui waktu.</p>
         </div>
       </div>
+
+      <div class="about-stats fade-in">
+        {stats.map(stat => (
+          <div class="stat-item">
+            <span class="stat-val">{stat.value}</span>
+            <span class="stat-label">{stat.label}</span>
+          </div>
+        ))}
+      </div>
     </section>
 
-    <section class="branding-footer fade-in">
-      <h2 class="footer-logo">MARCHIVE</h2>
-      <div class="footer-meta">
+    <section class="about-branding fade-in">
+      <h2>MARCHIVE</h2>
+      <div class="branding-meta">
         <span>EST. 2026</span>
         <span class="dot"></span>
         <span>DIGITAL ARCHIVE</span>
@@ -55,20 +77,23 @@ import Layout from '@layouts/Layout.astro';
   </main>
 </Layout>
 
-<style>
+<style is:global>
+  @reference "../styles/global.css";
+
   .about-page {
     padding-top: 180px;
     padding-bottom: 150px;
   }
 
   .about-header {
-    margin-bottom: 100px;
     text-align: center;
+    margin-bottom: 100px;
   }
 
-  h1 {
+  .about-header h1 {
     font-size: 5rem;
     letter-spacing: 0.1em;
+    @apply font-serif uppercase leading-tight;
   }
 
   .intro-grid {
@@ -79,90 +104,109 @@ import Layout from '@layouts/Layout.astro';
     margin-bottom: 150px;
   }
 
-  .large-text {
+  .intro-lead {
     font-size: 2rem;
-    font-family: var(--font-serif);
     line-height: 1.4;
     margin-bottom: 40px;
-    color: var(--accent-color);
+    @apply font-serif text-accent;
   }
 
-  .main-text p:not(.large-text) {
+  .intro-text {
     font-size: 1.1rem;
     opacity: 0.8;
     line-height: 1.8;
     max-width: 500px;
   }
 
-  .philosophy-box {
+  .philosophy-section {
     margin-top: 60px;
     border-left: 2px solid var(--accent-color);
     padding-left: 30px;
   }
 
-  .philosophy-box h3 {
+  .philosophy-section h3 {
     font-size: 0.8rem;
     letter-spacing: 0.2em;
-    margin-bottom: 15px;
     opacity: 0.6;
+    margin-bottom: 15px;
+    @apply font-serif;
   }
 
-  .philosophy-box p {
+  .philosophy-section p {
+    font-size: 1.2rem;
     font-style: italic;
-    font-size: 1.2rem !important;
+    opacity: 1;
   }
 
-  .main-img {
+  .about-main-img {
     width: 100%;
     height: 700px;
     object-fit: cover;
-    border: 1px solid var(--glass-border);
+    @apply border border-glass-border;
   }
 
-  /* Details Grid */
-  .details-grid {
+  .core-pillars {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 60px;
     margin-bottom: 150px;
-    border-top: 1px solid var(--glass-border);
     padding-top: 60px;
+    border-top: 1px solid var(--color-glass-border);
   }
 
-  .detail-item span {
+  .pillar-item .num {
     font-size: 0.7rem;
-    color: var(--accent-color);
-    font-weight: 700;
-    display: block;
-    margin-bottom: 20px;
+    @apply text-accent font-bold block mb-5;
   }
 
-  .detail-item h4 {
+  .pillar-item h4 {
     font-size: 1.1rem;
     margin-bottom: 20px;
     letter-spacing: 0.1em;
+    @apply uppercase;
   }
 
-  .detail-item p {
+  .pillar-item p {
     font-size: 0.9rem;
     opacity: 0.6;
     line-height: 1.6;
   }
 
-  /* Branding Footer */
-  .branding-footer {
+  .about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 60px;
+    margin-top: 100px;
     text-align: center;
-    border-top: 1px solid var(--glass-border);
+  }
+
+  .stat-val {
+    font-size: 4rem;
+    line-height: 1;
+    @apply font-serif text-accent block mb-2;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+    @apply uppercase;
+  }
+
+  .about-branding {
+    text-align: center;
+    border-top: 1px solid var(--color-glass-border);
     padding-top: 100px;
   }
 
-  .footer-logo {
+  .about-branding h2 {
     font-size: 4rem;
-    margin-bottom: 20px;
     letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    @apply font-serif uppercase;
   }
 
-  .footer-meta {
+  .branding-meta {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -170,22 +214,23 @@ import Layout from '@layouts/Layout.astro';
     font-size: 0.8rem;
     letter-spacing: 0.2em;
     opacity: 0.6;
+    @apply uppercase;
   }
 
-  .dot {
+  .branding-meta .dot {
     width: 4px;
     height: 4px;
-    background: var(--accent-color);
-    border-radius: 50%;
+    @apply bg-accent rounded-full;
   }
 
   @media (max-width: 992px) {
-    .intro-grid, .details-grid {
-      grid-template-columns: 1fr;
-      gap: 50px;
-    }
-    h1 { font-size: 3rem; }
-    .footer-logo { font-size: 2.5rem; }
-    .main-img { height: 400px; }
+    .about-page { padding-top: 120px; }
+    .about-header h1 { font-size: 3rem; }
+    .intro-grid { grid-template-columns: 1fr; gap: 50px; text-align: center; }
+    .intro-text { margin: 0 auto; }
+    .about-main-img { height: 400px; }
+    .core-pillars { grid-template-columns: 1fr; gap: 40px; }
+    .about-stats { grid-template-columns: 1fr; gap: 60px; }
+    .about-branding h2 { font-size: 2.5rem; }
   }
 </style>

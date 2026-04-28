@@ -59,64 +59,47 @@ if (Astro.request.method === 'POST') {
 
 
 <AdminLayout title={`Edit Category: ${category.name}`} activePage="categories">
-  <div style="max-width: 600px;">
-    <div class="form-header">
-      <a href="/admin/categories" class="back-link">&larr; BACK TO LIST</a>
-      <h1>Edit Category</h1>
+  <div class="max-w-[600px]">
+    <div class="mb-[50px]">
+      <a href="/admin/categories" class="text-[0.7rem] tracking-[0.1em] opacity-50 no-underline mb-[15px] block hover:opacity-100 hover:text-accent">&larr; BACK TO LIST</a>
+      <h1 class="text-[2.5rem] font-serif leading-tight">Edit Category</h1>
     </div>
 
-    {error && <div class="alert alert-error">{error}</div>}
-    {success && <div class="alert alert-success">{success}</div>}
+    {error && <div class="bg-red-500/10 text-red-500 p-[15px] rounded-lg mb-[30px] border border-red-500/20 text-[0.85rem]">{error}</div>}
+    {success && <div class="bg-green-500/10 text-green-400 p-[15px] rounded-lg mb-[30px] border border-green-500/20 text-[0.85rem]">{success}</div>}
 
-    <form class="admin-form" method="POST" id="edit-category-form">
+    <form class="flex flex-col gap-6" method="POST" id="edit-category-form">
       <input type="hidden" name="action" id="form-action" value="update" />
-      <div class="form-group">
-        <label for="name">CATEGORY NAME</label>
-        <input type="text" id="name" name="name" class="form-control" value={category.name} required />
+      <div class="flex flex-col gap-2">
+        <label for="name" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">CATEGORY NAME</label>
+        <input type="text" id="name" name="name" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all" value={category.name} required />
       </div>
 
-      <div class="form-group">
-        <label for="type">CONTENT TYPE</label>
-        <select id="type" name="type" class="form-control" required>
-          <option value="book" selected={category.type === 'book'}>Book / Series</option>
-          <option value="single" selected={category.type === 'single'}>Single Piece</option>
+      <div class="flex flex-col gap-2">
+        <label for="type" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">CONTENT TYPE</label>
+        <select id="type" name="type" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all appearance-none cursor-pointer" required>
+          <option value="book" selected={category.type === 'book'} class="bg-[#0a0a0a]">Book / Series</option>
+          <option value="single" selected={category.type === 'single'} class="bg-[#0a0a0a]">Single Piece</option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="slug">URL SLUG</label>
-        <input type="text" id="slug" name="slug" class="form-control" value={category.slug} required />
+      <div class="flex flex-col gap-2">
+        <label for="slug" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">URL SLUG</label>
+        <input type="text" id="slug" name="slug" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all" value={category.slug} required />
       </div>
 
-      <div class="form-group">
-        <label for="description">DESCRIPTION</label>
-        <textarea id="description" name="description" class="form-control" rows="4">{category.description}</textarea>
+      <div class="flex flex-col gap-2">
+        <label for="description" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">DESCRIPTION</label>
+        <textarea id="description" name="description" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all resize-none" rows="4">{category.description}</textarea>
       </div>
 
-      <div style="margin-top: 40px; display: flex; gap: 15px;">
-        <button type="submit" class="btn-primary">SAVE CHANGES</button>
-        <button type="button" class="btn-secondary" style="border: 1px solid #ff4444; color: #ff4444;" id="delete-btn">DELETE CATEGORY</button>
+      <div class="mt-10 flex gap-[15px]">
+        <button type="submit" class="bg-accent text-black px-8 py-4 rounded-lg font-bold text-[0.8rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer">SAVE CHANGES</button>
+        <button type="button" class="bg-transparent text-red-500 border border-red-500 px-8 py-4 rounded-lg font-bold text-[0.8rem] tracking-[0.1em] hover:bg-red-500 hover:text-black transition-all cursor-pointer" id="delete-btn">DELETE CATEGORY</button>
       </div>
     </form>
   </div>
 </AdminLayout>
-
-<style>
-  .form-header { margin-bottom: 50px; }
-  .back-link { font-size: 0.7rem; letter-spacing: 0.1em; opacity: 0.5; text-decoration: none; margin-bottom: 15px; display: block; }
-  .form-header h1 { font-size: 2.5rem; font-family: var(--font-serif); }
-
-  .alert {
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    font-size: 0.85rem;
-    border: 1px solid;
-  }
-
-  .alert-error { background: rgba(255, 68, 68, 0.1); color: #ff4444; border-color: rgba(255, 68, 68, 0.2); }
-  .alert-success { background: rgba(68, 255, 68, 0.1); color: #44ff44; border-color: rgba(68, 255, 68, 0.2); }
-</style>
 
 <script is:inline>
   const form = document.getElementById('edit-category-form');

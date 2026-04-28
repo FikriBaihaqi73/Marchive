@@ -13,25 +13,26 @@ const { id, title, category, cover, date = '2024', metadata = '' } = Astro.props
 
 <a 
   href={`/works/${id}`}
-  class="gallery-item-new fade-in" 
+  class="gallery-item-new fade-in block cursor-pointer transition-all duration-400 border border-glass-border bg-black hover:border-accent hover:-translate-y-[5px] group no-underline" 
   data-category={category.toLowerCase()}
 >
-  <div class="card-inner">
-    <div class="image-box">
-      <img src={cover} alt={title} loading="lazy" />
+  <div class="flex flex-col h-full">
+    <div class="aspect-square overflow-hidden border-b border-glass-border">
+      <img 
+        src={cover} 
+        alt={title} 
+        loading="lazy" 
+        class="w-full h-full object-cover transition-transform duration-800 ease-in-out grayscale-[0.5] group-hover:scale-[1.05] group-hover:grayscale-0" 
+      />
     </div>
-    <div class="content-box">
+    <div class="p-5 max-md:p-3 flex flex-col justify-between flex-grow">
       <div class="main-info">
-        <h3>{title}</h3>
-        <p class="type">{category}</p>
+        <h3 class="text-[1rem] max-md:text-[0.75rem] mb-2 max-md:mb-1 max-md:leading-[1.2] text-text-main">{title}</h3>
+        <p class="text-[0.75rem] max-md:text-[0.55rem] uppercase tracking-[0.1em] text-accent mb-5 max-md:mb-2">{category}</p>
       </div>
-      <div class="footer-info">
+      <div class="border-t border-glass-border pt-[15px] max-md:pt-2 text-[0.7rem] max-md:text-[0.55rem] opacity-50 uppercase">
         <span class="date">{date}</span>
       </div>
     </div>
   </div>
 </a>
-
-<style>
-  @import "../styles/gallery-item.css";
-</style>

@@ -28,9 +28,9 @@ const featuredWorks = await db
     
     <!-- Static Part: Left Side -->
     <div class="hero-static">
-      <div class="section-num">01</div>
+      <span class="section-num">01</span>
       <h1 class="fade-in">MARCHIVE</h1>
-      <p class="fade-in subtitle">A collection of thoughts, stories, and creations.</p>
+      <p class="subtitle fade-in">A collection of thoughts, stories, and creations.</p>
     </div>
 
     <!-- Sliding Part: Right Side -->
@@ -39,30 +39,41 @@ const featuredWorks = await db
         {featuredWorks.length === 0 && (
           <div class="hero-slide active">
             <div class="slide-content-wrap">
-              <div class="image-box" style="background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: center;">
-                <span style="opacity: 0.2; font-size: 0.8rem; letter-spacing: 0.5em;">NO ENTRIES YET</span>
-              </div>
-              <div class="slide-caption">
-                <p class="slide-cat">SYSTEM</p>
-                <h3>Welcome to Marchive</h3>
+              <div class="image-link-wrap">
+                <div class="image-box flex items-center justify-center">
+                  <span class="opacity-20 text-[0.8rem] tracking-[0.5em]">NO ENTRIES YET</span>
+                </div>
+                <div class="slide-caption">
+                  <span class="cat">SYSTEM</span>
+                  <h3 class="work-title">Welcome to Marchive</h3>
+                </div>
               </div>
             </div>
           </div>
         )}
         {featuredWorks.map((work, index) => (
-          <div class={`hero-slide ${index === 0 ? 'active' : ''}`} data-index={index}>
+          <div 
+            class={`hero-slide ${index === 0 ? 'active' : ''}`} 
+            data-index={index}
+          >
             <div class="slide-content-wrap">
-              <a href={`/works/${work.id}`} class="image-link-wrap">
+              <a href={`/works/${work.id}`} class="image-link-wrap group">
                 <div class="image-box">
-                  <img src={work.cover || "https://via.placeholder.com/600x800"} alt={work.title} />
+                  <img 
+                    src={work.cover || "https://via.placeholder.com/600x800"} 
+                    alt={work.title} 
+                    class="group-hover:scale-110"
+                  />
                 </div>
               </a>
 
               <div class="slide-caption">
-                <!-- Progress Indicators - Right above the category -->
                 <div class="slide-progress">
                   {featuredWorks.map((_, i) => (
-                    <span class={`dot-line ${i === index ? 'active' : ''}`} data-index={i}></span>
+                    <span 
+                      class={`dot-line ${i === index ? 'active' : ''}`} 
+                      data-index={i}
+                    ></span>
                   ))}
                 </div>
                 <span class="cat">{work.categoryName || 'UNCATEGORIZED'}</span>
@@ -72,7 +83,6 @@ const featuredWorks = await db
           </div>
         ))}
 
-        {/* Persistent Arrow Navigation */}
         <div class="slider-controls-ui">
           <div class="arrows-wrap">
             <button id="prev-hero" class="nav-btn-new" aria-label="Previous">
@@ -88,8 +98,230 @@ const featuredWorks = await db
   </div>
 </section>
 
-<style>
-  @import "../styles/hero.css";
+<style is:global>
+  @reference "../styles/global.css";
+
+  .hero-hybrid {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 100px;
+    padding-bottom: 50px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .section-num {
+    @apply text-[0.7rem] font-extrabold tracking-[0.3em] opacity-30 mb-5 block;
+  }
+
+  .hero-static h1 {
+    font-size: 6rem;
+    line-height: 1;
+    margin-bottom: 30px;
+    letter-spacing: 0.1em;
+    font-family: var(--font-serif);
+    @apply uppercase;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    max-width: 320px;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.6;
+  }
+
+  .hero-slider-side {
+    position: relative;
+    width: 100%;
+  }
+
+  .slides-inner {
+    position: relative;
+    height: 550px;
+  }
+
+  .hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hero-slide.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .slide-content-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .image-link-wrap {
+    display: block;
+    width: 90%;
+    margin-left: auto;
+    cursor: pointer;
+  }
+
+  .image-box {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #000;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.5s ease, filter 1.5s ease;
+    filter: brightness(0.7);
+  }
+
+  .hero-slide.active img {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+
+  .slide-caption {
+    margin-top: 25px;
+    width: 90%;
+    margin-left: auto;
+    text-align: left;
+  }
+
+  .slide-progress {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .cat {
+    @apply text-[0.65rem] tracking-[0.2em] text-accent uppercase block mb-2;
+  }
+
+  .work-title {
+    font-size: 1.5rem;
+    font-family: var(--font-serif);
+    color: var(--text-color);
+    @apply uppercase;
+  }
+
+  /* UI CONTROLS */
+  .slider-controls-ui {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 90%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .arrows-wrap {
+    position: absolute;
+    top: 33%; 
+    transform: translateY(-50%);
+    left: -28px;
+    right: -28px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .nav-btn-new {
+    pointer-events: auto;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.3;
+    transition: all 0.3s ease;
+  }
+
+  .nav-btn-new svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav-btn-new:hover {
+    opacity: 1;
+    color: var(--accent-color);
+    @apply scale-110;
+  }
+
+  .dot-line {
+    width: 15px;
+    height: 1px;
+    background: #fff;
+    opacity: 0.15;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .dot-line.active {
+    opacity: 1;
+    background: var(--accent-color);
+    width: 25px;
+  }
+
+  @media (max-width: 992px) {
+    .hero-hybrid {
+      padding-top: 120px;
+      min-height: auto;
+    }
+    .hero-grid { 
+      grid-template-columns: 1fr; 
+      gap: 60px; 
+      text-align: center;
+    }
+    .hero-static h1 { 
+      font-size: 4rem; 
+      margin-bottom: 20px;
+    }
+    .subtitle {
+      margin: 0 auto;
+    }
+    .slides-inner { height: auto; min-height: 350px; }
+    .image-link-wrap { width: 100%; }
+    .slider-controls-ui { width: 100%; }
+    .arrows-wrap { 
+      top: auto;
+      bottom: -60px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      width: 150px;
+      pointer-events: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-static h1 { font-size: 3rem; }
+    .slides-inner { min-height: 280px; }
+  }
 </style>
 
 <script src="../scripts/hero-slider.ts"></script>

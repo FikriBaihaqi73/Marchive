@@ -33,232 +33,49 @@ const categorizedWorks = await Promise.all(dbCategories.map(async (cat) => {
 
 
 <Layout>
-  <main class="categories-page container">
-    <header class="page-header">
-      <div class="section-num">03</div>
-      <h1 class="fade-in">COLLECTIONS</h1>
-      <p class="subtitle fade-in">Browse the archive by creative chambers.</p>
+  <main class="pt-[180px] max-md:pt-[120px] pb-[150px] container">
+    <header class="text-center mb-[100px] max-md:mb-[60px]">
+      <div class="flex items-center gap-[15px] justify-center text-[0.9rem] font-medium mb-5">03</div>
+      <h1 class="text-[3rem] lg:text-[5rem] tracking-[0.1em] fade-in">COLLECTIONS</h1>
+      <p class="text-[0.9rem] tracking-[0.3em] opacity-50 uppercase fade-in">Browse the archive by creative chambers.</p>
     </header>
 
-    <div class="category-grid">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-[60px] lg:gap-x-[60px] lg:gap-y-[100px]">
       {categorizedWorks.map((cat) => (
-        <a href={`/works?filter=${cat.name.toLowerCase()}`} class="cat-card fade-in">
-          <div class="collage-container">
+        <a href={`/works?filter=${cat.name.toLowerCase()}`} class="group block no-underline text-inherit transition-transform duration-400 hover:-translate-y-2.5 fade-in">
+          <div class="relative w-full aspect-[4/3] bg-white/2 border border-glass-border overflow-hidden mb-[30px]">
             {/* Collage stack Effect */}
-            <div class="collage-stack">
+            <div class="relative w-full h-full p-10 max-md:p-5 flex items-center justify-center">
               {cat.covers.map((cover, idx) => (
-                <div class={`collage-item item-${idx}`}>
-                  <img src={cover} alt="" />
+                <div class={`absolute w-1/2 aspect-[3/4] bg-[#111] border border-white/10 shadow-[10px_10px_30px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-500 cubic-bezier-[0.4,0,0.2,1] 
+                  ${idx === 0 ? 'z-[3] -rotate-2 group-hover:rotate-0' : ''}
+                  ${idx === 1 ? 'z-[2] translate-x-[30%] translate-y-[15%] rotate-[5deg] opacity-80 group-hover:translate-x-[45%] group-hover:translate-y-[25%] group-hover:rotate-[10deg]' : ''}
+                  ${idx === 2 ? 'z-[1] -translate-x-[30%] -translate-y-[15%] -rotate-[8deg] opacity-60 group-hover:-translate-x-[45%] group-hover:-translate-y-[25%] group-hover:-rotate-[15deg]' : ''}
+                `}>
+                  <img src={cover} alt="" class="w-full h-full object-cover" />
                 </div>
               ))}
               {/* Fallback pattern if only 1-2 covers exist */}
               {cat.covers.length < 3 && (
-                <div class="collage-item empty">
-                  <span>MARCHIVE</span>
+                <div class="absolute w-1/2 aspect-[3/4] bg-accent z-0 flex items-center justify-center">
+                  <span class="text-[0.6rem] text-black font-black tracking-[0.2em] -rotate-90">MARCHIVE</span>
                 </div>
               )}
             </div>
             
-            <div class="overlay">
-              <span class="view-btn">EXPLORE ROOM &rarr;</span>
+            <div class="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center opacity-0 transition-opacity duration-400 backdrop-blur-[2px] z-10 group-hover:opacity-100">
+              <span class="text-[0.75rem] font-bold tracking-[0.2em] bg-accent text-black p-[12px_24px]">EXPLORE ROOM &rarr;</span>
             </div>
           </div>
           
-          <div class="cat-info">
-            <div class="header-line">
-              <h2>{cat.name}</h2>
-              <span class="count">{cat.count} {cat.count > 1 ? 'WORKS' : 'WORK'}</span>
+          <div>
+            <div class="flex justify-between items-baseline mb-2.5">
+              <h2 class="text-[1.8rem] font-serif tracking-[0.05em]">{cat.name}</h2>
+              <span class="text-[0.7rem] opacity-40 font-bold tracking-[0.1em]">{cat.count} {cat.count > 1 ? 'WORKS' : 'WORK'}</span>
             </div>
-            <div class="divider"></div>
+            <div class="w-10 h-[1px] bg-accent transition-all duration-400 group-hover:w-full"></div>
           </div>
         </a>
       ))}
     </div>
   </main>
-</Layout>
-
-<style>
-  .categories-page {
-    padding-top: 180px;
-    padding-bottom: 150px;
-  }
-
-  .page-header {
-    text-align: center;
-    margin-bottom: 100px;
-  }
-
-  h1 {
-    font-size: 5rem;
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
-  }
-
-  .subtitle {
-    font-size: 0.9rem;
-    letter-spacing: 0.3em;
-    opacity: 0.5;
-    text-transform: uppercase;
-  }
-
-  /* Grid Layout */
-  .category-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 100px 60px;
-  }
-
-  .cat-card {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.4s ease;
-  }
-
-  .cat-card:hover {
-    transform: translateY(-10px);
-  }
-
-  /* Collage System */
-  .collage-container {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--glass-border);
-    overflow: hidden;
-    margin-bottom: 30px;
-  }
-
-  .collage-stack {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .collage-item {
-    position: absolute;
-    width: 50%;
-    aspect-ratio: 3 / 4;
-    background: #111;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .collage-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Artistic Overlapping */
-  .item-0 { 
-    z-index: 3; 
-    transform: translate(0, 0) rotate(-2deg); 
-  }
-  .item-1 { 
-    z-index: 2; 
-    transform: translate(30%, 15%) rotate(5deg); 
-    opacity: 0.8;
-  }
-  .item-2 { 
-    z-index: 1; 
-    transform: translate(-30%, -15%) rotate(-8deg); 
-    opacity: 0.6;
-  }
-
-  .empty {
-    z-index: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--accent-color);
-  }
-  
-  .empty span {
-    font-size: 0.6rem;
-    color: #000;
-    font-weight: 900;
-    letter-spacing: 0.2em;
-    transform: rotate(-90deg);
-  }
-
-  .cat-card:hover .item-1 { transform: translate(45%, 25%) rotate(10deg); }
-  .cat-card:hover .item-2 { transform: translate(-45%, -25%) rotate(-15deg); }
-
-  /* Overlay */
-  .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    backdrop-filter: blur(2px);
-    z-index: 10;
-  }
-
-  .cat-card:hover .overlay {
-    opacity: 1;
-  }
-
-  .view-btn {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    background: var(--accent-color);
-    color: #000;
-    padding: 12px 24px;
-  }
-
-  /* Text Info */
-  .header-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-  }
-
-  h2 {
-    font-size: 1.8rem;
-    font-family: var(--font-serif);
-    letter-spacing: 0.05em;
-  }
-
-  .count {
-    font-size: 0.7rem;
-    opacity: 0.4;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-  }
-
-  .divider {
-    width: 40px;
-    height: 1px;
-    background: var(--accent-color);
-    transition: width 0.4s ease;
-  }
-
-  .cat-card:hover .divider {
-    width: 100%;
-  }
-
-  @media (max-width: 768px) {
-    .categories-page { padding-top: 120px; }
-    .page-header { margin-bottom: 60px; }
-    .category-grid { grid-template-columns: 1fr; gap: 60px; }
-    h1 { font-size: 3rem; }
-    .collage-stack { padding: 20px; }
-  }
-</style>

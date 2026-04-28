@@ -2,17 +2,13 @@
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="main-footer">
-  <div class="container footer-bottom">
+<footer class="pb-[60px] border-t border-glass-border pt-10 mt-[100px] container">
+  <div class="flex flex-col lg:flex-row justify-between items-center gap-5 text-[0.65rem] tracking-[0.1em] opacity-50 uppercase">
     <p>&copy; {currentYear} Marchive. All rights reserved.</p>
-    <div class="footer-links">
-      <a href="#">PRIVACY POLICY</a>
-      <a href="#">TERMS OF SERVICE</a>
-      <a href="#">CONTACT</a>
+    <div class="flex gap-[30px]">
+      <a href="#" class="hover:text-accent transition-colors duration-300 no-underline">PRIVACY POLICY</a>
+      <a href="#" class="hover:text-accent transition-colors duration-300 no-underline">TERMS OF SERVICE</a>
+      <a href="#" class="hover:text-accent transition-colors duration-300 no-underline">CONTACT</a>
     </div>
   </div>
 </footer>
-
-<style>
-  @import "../styles/footer.css";
-</style>

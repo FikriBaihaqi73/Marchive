@@ -4,6 +4,7 @@ import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { createToken } from '../lib/auth';
+import '../styles/global.css';
 
 let error = '';
 
@@ -53,52 +54,38 @@ if (Astro.request.method === 'POST') {
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<title>LOGIN | MARCHIVE ACCESS</title>
-		<style is:global>
-			@import "../styles/global.css";
-      @import "../styles/login.css";
-		</style>
 	</head>
-	<body>
-    <main class="login-page">
-      <div class="login-bg-decor">
-        <div class="decor-circle"></div>
+	<body class="bg-[#050505] text-white font-sans antialiased">
+    <main class="min-h-screen flex items-center justify-center p-5 relative overflow-hidden">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none opacity-20">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px]"></div>
       </div>
 
-      <div class="login-card fade-in">
-        <header class="login-header">
-          <p>Restricted Area</p>
-          <h1>MARCHIVE</h1>
-          <div class="divider-small"></div>
+      <div class="w-full max-w-[420px] bg-white/3 backdrop-blur-[20px] border border-glass-border p-[60px_40px] rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-10 fade-in">
+        <header class="text-center mb-[40px]">
+          <p class="text-[0.65rem] tracking-[0.3em] uppercase opacity-40 mb-2.5">Restricted Area</p>
+          <h1 class="text-[2.5rem] tracking-[0.2em] font-serif">MARCHIVE</h1>
+          <div class="w-[30px] h-[1px] bg-accent mx-auto mt-5"></div>
         </header>
 
-        {error && <div class="error-msg" style="color: var(--accent-color); background: rgba(212, 175, 55, 0.05); padding: 12px; border-radius: 4px; margin: 20px 0; font-size: 0.7rem; text-align: center; border: 1px solid rgba(212, 175, 55, 0.2); letter-spacing: 0.1em;">{error}</div>}
+        {error && <div class="text-accent bg-accent/5 p-3 rounded border border-accent/20 text-[0.7rem] text-center mb-5 tracking-[0.1em]">{error}</div>}
 
-        <form class="login-form" method="POST">
-          <div class="input-group">
-            <label for="identifier">ACCESS IDENTIFIER</label>
-            <input type="text" id="identifier" name="identifier" placeholder="Username or Email" required />
+        <form class="flex flex-col gap-6" method="POST">
+          <div class="flex flex-col gap-2">
+            <label for="identifier" class="text-[0.6rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">ACCESS IDENTIFIER</label>
+            <input type="text" id="identifier" name="identifier" placeholder="Username or Email" required class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all placeholder:opacity-20" />
           </div>
 
-          <div class="input-group">
-            <label for="passkey">SECURE PASSKEY</label>
-            <input type="password" id="passkey" name="passkey" placeholder="••••••••" required />
+          <div class="flex flex-col gap-2">
+            <label for="passkey" class="text-[0.6rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">SECURE PASSKEY</label>
+            <input type="password" id="passkey" name="passkey" placeholder="••••••••" required class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all placeholder:opacity-20" />
           </div>
 
-          <button type="submit" class="login-btn">AUTHORIZE ACCESS</button>
+          <button type="submit" class="mt-[10px] bg-accent text-black p-5 rounded-lg font-bold text-[0.8rem] tracking-[0.2em] uppercase transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer">AUTHORIZE ACCESS</button>
         </form>
 
-        <a href="/" class="back-to-site">&larr; RETURN TO PUBLIC ARCHIVE</a>
+        <a href="/" class="block text-center mt-[40px] text-[0.7rem] tracking-[0.1em] opacity-40 no-underline transition-all hover:opacity-100 hover:text-accent">&larr; RETURN TO PUBLIC ARCHIVE</a>
       </div>
     </main>
-
 	</body>
 </html>
-
-<style>
-  .divider-small {
-    width: 30px;
-    height: 1px;
-    background: var(--accent-color);
-    margin: 20px auto 0;
-  }
-</style>

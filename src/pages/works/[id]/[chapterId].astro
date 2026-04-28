@@ -56,236 +56,70 @@ const [nextChapter] = await db
 
 
 <Layout title={`${work.title} - ${chapter.title}`}>
-  <!-- Special Reader Layout to override global nav if needed via CSS -->
-  <div class="reader-mode-wrapper">
+  {/* Local Overrides to hide global elements for focus mode */}
+  <style is:global>
+    nav:not(.minimal-nav), footer { display: none !important; }
+  </style>
+
+  <div class="bg-[#050505] min-h-screen text-[#ccc] text-lg">
     
     <!-- Ultra Minimalist Top Bar -->
-    <nav class="minimal-nav">
-      <div class="container nav-content">
-        <a href={`/works/${work.id}`} class="back-link">
+    <nav class="minimal-nav fixed top-0 left-0 w-full h-[60px] bg-[#050505] border-b border-white/5 z-[9999]">
+      <div class="container h-full flex justify-between items-center relative">
+        <a href={`/works/${work.id}`} class="flex items-center gap-2 text-[0.7rem] font-bold tracking-[0.1em] opacity-50 no-underline text-inherit hover:opacity-100 hover:text-accent transition-all">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           <span>BACK</span>
         </a>
-        <div class="nav-info">
-          <span class="btit">{work.title}</span>
-          <span class="divider">/</span>
-          <span class="ctit">{chapter.title}</span>
+        <div class="hidden sm:flex text-[0.75rem] tracking-[0.05em] uppercase gap-2.5 opacity-40">
+          <span class="truncate max-w-[150px]">{work.title}</span>
+          <span>/</span>
+          <span class="text-accent opacity-100 font-bold truncate max-w-[200px]">{chapter.title}</span>
         </div>
-        <div class="nav-progress-outer">
-          <div class="nav-progress-inner" id="scroll-bar"></div>
+        <div class="absolute bottom-0 left-0 w-full h-[2px] bg-white/5">
+          <div class="h-full bg-accent w-0 transition-all duration-100" id="scroll-bar"></div>
         </div>
       </div>
     </nav>
 
-    <main class="reader-main container">
-      <article class="reader-article">
-        <header class="reader-header">
-          <span class="chapter-label">CHAPTER {chapter.order}</span>
-          <h1>{chapter.title}</h1>
+    <main class="max-w-[680px]! mx-auto pt-[150px] pb-[100px] px-5">
+      <article>
+        <header class="text-center mb-20">
+          <span class="text-[0.75rem] text-accent tracking-[0.4em] block mb-5 uppercase">CHAPTER {chapter.order}</span>
+          <h1 class="text-[2.5rem] lg:text-[3.5rem] leading-[1.2] text-white font-serif">{chapter.title}</h1>
         </header>
 
-        <section class="reader-body serif ql-editor" set:html={chapter.content}>
+        <section class="text-xl lg:text-[1.25rem] leading-[2] text-white/80 whitespace-pre-line mb-[100px] font-serif ql-editor" set:html={chapter.content}>
         </section>
 
-        <section class="reader-footer-nav">
+        <section class="pt-20 border-t border-white/5">
           {nextChapter ? (
-            <div class="next-up">
-              <span class="next-label">UP NEXT</span>
-              <a href={`/works/${work.id}/${nextChapter.id}`} class="next-link">
-                <h2>{nextChapter.title}</h2>
-                <div class="next-arrow">
+            <div class="text-center">
+              <span class="text-[0.7rem] tracking-[0.3em] opacity-40 block mb-5 uppercase">UP NEXT</span>
+              <a href={`/works/${work.id}/${nextChapter.id}`} class="no-underline group">
+                <h2 class="text-[2rem] lg:text-[2.5rem] font-serif text-accent mb-5 group-hover:underline">{nextChapter.title}</h2>
+                <div class="flex items-center justify-center gap-[15px] text-[0.8rem] font-bold tracking-[0.1em] opacity-60 group-hover:opacity-100 transition-all">
                   CONTINUE READING
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </a>
             </div>
           ) : (
-            <div class="end-book">
-              <p style="text-align: center; opacity: 0.5; margin-bottom: 30px;">You've finished the available chapters.</p>
-              <div style="text-align: center;">
-                <a href={`/works/${work.id}`} class="btn-archive">BACK TO BOOK DETAIL</a>
+            <div class="text-center">
+              <p class="opacity-50 mb-[30px] text-sm">You've finished the available chapters.</p>
+              <div class="text-center">
+                <a href={`/works/${work.id}`} class="inline-block px-[30px] py-3 bg-accent text-black font-bold text-[0.8rem] no-underline hover:scale-105 transition-all">BACK TO BOOK DETAIL</a>
               </div>
             </div>
           )}
           
-          <div class="bottom-utility">
-            {prevChapter && <a href={`/works/${work.id}/${prevChapter.id}`} style="color: var(--accent-color); text-decoration: none;">&larr; Previous Chapter</a>}
+          <div class="mt-[100px] flex justify-center text-[0.8rem] opacity-30">
+            {prevChapter && <a href={`/works/${work.id}/${prevChapter.id}`} class="text-accent no-underline hover:underline">&larr; Previous Chapter</a>}
           </div>
         </section>
       </article>
     </main>
-
   </div>
 </Layout>
-
-<style>
-  /* Local Overrides to hide global elements for focus mode */
-  :global(nav:not(.minimal-nav)),
-  :global(footer) {
-    display: none !important;
-  }
-
-  .reader-mode-wrapper {
-    background: #050505;
-    min-height: 100vh;
-    color: #ccc;
-    font-size: 18px;
-  }
-
-  .minimal-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: #050505;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    z-index: 9999;
-  }
-
-  .nav-content {
-    height: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-  }
-
-  .back-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    opacity: 0.5;
-  }
-
-  .nav-info {
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    display: flex;
-    gap: 10px;
-    opacity: 0.4;
-  }
-
-  .ctit { color: var(--accent-color); opacity: 1; font-weight: 700; }
-
-  .nav-progress-outer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(255,255,255,0.05);
-  }
-
-  .nav-progress-inner {
-    height: 100%;
-    background: var(--accent-color);
-    width: 0%;
-  }
-
-  /* Main Content */
-  .reader-main {
-    max-width: 680px !important;
-    padding-top: 150px;
-    padding-bottom: 100px;
-  }
-
-  .reader-header {
-    text-align: center;
-    margin-bottom: 80px;
-  }
-
-  .chapter-label {
-    font-size: 0.75rem;
-    color: var(--accent-color);
-    letter-spacing: 0.4em;
-    display: block;
-    margin-bottom: 20px;
-  }
-
-  h1 {
-    font-size: 3rem;
-    line-height: 1.2;
-    color: #fff;
-    font-family: var(--font-serif);
-  }
-
-  .reader-body {
-    font-size: 1.25rem;
-    line-height: 2;
-    color: rgba(255, 255, 255, 0.8);
-    white-space: pre-line;
-    margin-bottom: 100px;
-  }
-
-  .serif {
-    font-family: 'Playfair Display', serif;
-  }
-
-  /* Footer Nav Area */
-  .reader-footer-nav {
-    padding-top: 80px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .next-up {
-    text-align: center;
-  }
-
-  .next-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
-    opacity: 0.4;
-    display: block;
-    margin-bottom: 20px;
-  }
-
-  .next-link h2 {
-    font-size: 2rem;
-    font-family: var(--font-serif);
-    color: var(--accent-color);
-    margin-bottom: 20px;
-  }
-
-  .next-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    opacity: 0.6;
-  }
-
-  .btn-archive {
-    display: inline-block;
-    padding: 12px 30px;
-    background: var(--accent-color);
-    color: #000;
-    font-weight: 700;
-    font-size: 0.8rem;
-    margin-top: 20px;
-  }
-
-  .bottom-utility {
-    margin-top: 100px;
-    display: flex;
-    justify-content: center;
-    font-size: 0.8rem;
-    opacity: 0.3;
-  }
-
-  @media (max-width: 600px) {
-    .nav-info { display: none; }
-    h1 { font-size: 2rem; }
-    .reader-body { font-size: 1.1rem; }
-  }
-</style>
 
 <script>
   function handleScroll() {

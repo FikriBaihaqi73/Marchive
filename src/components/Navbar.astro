@@ -3,27 +3,42 @@ const { pathname } = Astro.url;
 const isActive = (path: string) => pathname === path || (path !== '/' && pathname.startsWith(path));
 ---
 
-<nav class="navbar-new">
-  <div class="container nav-wrap">
-    <a href="/" class="logo">MARCHIVE</a>
+<nav class="absolute top-0 left-0 w-full z-100 py-10">
+  <div class="container flex justify-between items-center">
+    <a href="/" class="text-[1.4rem] font-medium text-accent font-serif tracking-[0.1em] no-underline">MARCHIVE</a>
     
-    <div class="nav-links" id="nav-links">
-      <a href="/" class={isActive('/') ? 'active' : ''}>HOME</a>
-      <a href="/works" class={isActive('/works') ? 'active' : ''}>WORKS</a>
-      <a href="/categories" class={isActive('/categories') ? 'active' : ''}>CATEGORIES</a>
-      <a href="/about" class={isActive('/about') ? 'active' : ''}>ABOUT</a>
+    <div 
+      id="nav-links"
+      class="nav-links fixed top-0 left-0 w-full h-screen bg-[#0a0a0ad9] backdrop-blur-[30px] flex flex-col justify-center items-center gap-10 z-[998] opacity-0 invisible translate-x-full pointer-events-none transition-all duration-600 cubic-bezier-[0.16,1,0.3,1] lg:static lg:w-auto lg:h-auto lg:bg-transparent lg:backdrop-blur-none lg:flex-row lg:opacity-100 lg:visible lg:translate-x-0 lg:pointer-events-auto lg:z-auto lg:left-1/2 lg:absolute lg:-translate-x-1/2 [&.open]:opacity-100 [&.open]:visible [&.open]:translate-x-0 [&.open]:pointer-events-auto [&.open]_a:opacity-100 [&.open]_a:translate-y-0"
+    >
+      {[
+        { href: '/', label: 'HOME' },
+        { href: '/works', label: 'WORKS' },
+        { href: '/categories', label: 'CATEGORIES' },
+        { href: '/about', label: 'ABOUT' },
+      ].map((link, i) => (
+        <a 
+          href={link.href} 
+          class={`text-[0.75rem] font-medium tracking-[0.15em] transition-all duration-300 lg:text-[0.75rem] lg:font-medium lg:opacity-50 hover:opacity-100 lg:hover:text-accent max-lg:text-[2rem] max-lg:font-serif max-lg:opacity-0 max-lg:translate-y-[30px] max-lg:transition-[transform,opacity] max-lg:duration-500 ${isActive(link.href) ? 'max-lg:!opacity-100 max-lg:!translate-y-0 opacity-100! text-accent! drop-shadow-[0_0_10px_rgba(197,160,89,0.3)]' : ''}`}
+          style={`transition-delay: ${0.2 + i * 0.1}s`}
+        >
+          {link.label}
+        </a>
+      ))}
     </div>
 
-    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Menu">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button 
+      class="menu-toggle relative z-[1000] p-2.5 bg-none border-none text-white cursor-pointer lg:hidden group" 
+      id="menu-toggle" 
+      aria-label="Toggle Menu"
+    >
+      <span class="block w-[25px] h-0.5 bg-current my-1.25 transition-all duration-300 group-[.open]:bg-accent group-[.open]:rotate-45 group-[.open]:translate-x-[5px] group-[.open]:translate-y-[5px]"></span>
+      <span class="block w-[25px] h-0.5 bg-current my-1.25 transition-all duration-300 group-[.open]:opacity-0 group-[.open]:scale-x-0"></span>
+      <span class="block w-[25px] h-0.5 bg-current my-1.25 transition-all duration-300 group-[.open]:bg-accent group-[.open]:-rotate-45 group-[.open]:translate-x-[5px] group-[.open]:-translate-y-[5px]"></span>
     </button>
   </div>
 </nav>
 
+
 <script src="../scripts/navbar.ts"></script>
 
-<style>
-  @import "../styles/navbar.css";
-</style>

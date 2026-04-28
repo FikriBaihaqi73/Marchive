@@ -5,13 +5,13 @@ import LatestWorks from '@components/LatestWorks.astro';
 ---
 
 <Layout>
-	<main>
+	<main class="pt-[100px] relative">
     <!-- Sidebar decoration -->
-    <div class="sidebar-text">SCROLL TO DISCOVER</div>
-    <div class="sidebar-socials">
-      <a href="#">INSTAGRAM</a>
-      <a href="#">TWITTER</a>
-      <a href="#">EMAIL</a>
+    <div class="fixed left-10 top-1/2 -translate-y-1/2 -rotate-90 origin-left text-[0.65rem] tracking-[0.3em] opacity-50 z-10 hidden lg:block">SCROLL TO DISCOVER</div>
+    <div class="fixed right-10 top-1/2 -translate-y-1/2 flex flex-col gap-[30px] text-[0.6rem] tracking-[0.2em] opacity-50 z-10 hidden lg:flex">
+      <a href="#" class="no-underline text-inherit hover:text-accent transition-colors">INSTAGRAM</a>
+      <a href="#" class="no-underline text-inherit hover:text-accent transition-colors">TWITTER</a>
+      <a href="#" class="no-underline text-inherit hover:text-accent transition-colors">EMAIL</a>
     </div>
 
     <Hero />
@@ -19,41 +19,3 @@ import LatestWorks from '@components/LatestWorks.astro';
 
 	</main>
 </Layout>
-
-<style>
-  main {
-    padding-top: 100px;
-    position: relative;
-  }
-
-  /* Sidebar Decorations */
-  .sidebar-text {
-    position: fixed;
-    left: 40px;
-    top: 50%;
-    transform: translateY(-50%) rotate(-90deg);
-    transform-origin: left;
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
-    opacity: 0.5;
-    z-index: 10;
-  }
-
-  .sidebar-socials {
-    position: fixed;
-    right: 40px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    opacity: 0.5;
-    z-index: 10;
-  }
-
-  @media (max-width: 992px) {
-    .sidebar-text, .sidebar-socials { display: none; }
-  }
-</style>

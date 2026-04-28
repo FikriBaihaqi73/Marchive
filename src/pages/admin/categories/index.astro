@@ -13,28 +13,64 @@ const categories = await Promise.all((await db.select().from(categoryTable)).map
   
   return { ...cat, worksCount };
 }));
+
+// 3. Handle POST Actions
+if (Astro.request.method === 'POST') {
+  const data = await Astro.request.formData();
+  const action = data.get('action')?.toString();
+
+  if (action === 'delete-category') {
+    const categoryId = parseInt(data.get('categoryId')?.toString() || '0');
+    if (categoryId) {
+      // Final safety check
+      const [{ count: workCount }] = await db
+        .select({ count: count(worksTable.id) })
+        .from(worksTable)
+        .where(eq(worksTable.categoryId, categoryId));
+
+      if (workCount === 0) {
+        await db.delete(categoryTable).where(eq(categoryTable.id, categoryId));
+      }
+      return Astro.redirect('/admin/categories');
+    }
+  }
+}
 ---
 
 <AdminLayout title="Category Management" activePage="categories">
-  <div class="works-list-header">
+  <div class="flex flex-col lg:flex-row justify-between items-center lg:items-start mb-[30px] gap-5">
     <div class="header-left">
-      <p>Organize your gallery by creating and managing categories.</p>
+      <p class="opacity-70">Organize your gallery by creating and managing categories.</p>
     </div>
-    <a href="/admin/categories/new" class="btn-primary">+ New Category</a>
+    <a href="/admin/categories/new" class="bg-accent text-black px-[30px] py-[15px] font-bold tracking-[0.1em] rounded-lg no-underline transition-all duration-300 hover:scale-105">+ New Category</a>
   </div>
 
-  <div class="category-grid">
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[25px]">
     {categories.map(cat => (
-      <div class="category-card">
-        <div class="cat-info">
-          <div class="cat-type-badge">{cat.type.toUpperCase()}</div>
-          <h3>{cat.name}</h3>
-          <p>{cat.description}</p>
+      <div class="bg-white/3 border border-glass-border p-[30px] rounded-xl flex flex-col justify-between transition-all duration-300 hover:border-accent">
+        <div class="mb-5">
+          <div class="inline-block bg-white/10 px-3 py-1 rounded-full text-[0.65rem] font-bold tracking-widest text-accent mb-4">{cat.type.toUpperCase()}</div>
+          <h3 class="text-xl font-serif mb-2">{cat.name}</h3>
+          <p class="text-sm opacity-50 line-clamp-2">{cat.description}</p>
         </div>
         
-        <div class="cat-footer">
-          <span class="work-count"><strong>{cat.worksCount}</strong> items</span>
-          <a href={`/admin/categories/${cat.id}/edit`} class="btn-edit">Edit Settings</a>
+        <div class="border-t border-glass-border pt-5 flex justify-between items-center">
+          <span class="text-sm opacity-60"><strong>{cat.worksCount}</strong> items</span>
+          <div class="flex gap-4 items-center">
+            <a href={`/admin/categories/${cat.id}/edit`} class="text-[0.7rem] font-bold tracking-widest text-accent hover:underline no-underline">EDIT</a>
+            <form method="POST" onsubmit="return confirm('Delete this category?');" class="inline">
+              <input type="hidden" name="action" value="delete-category" />
+              <input type="hidden" name="categoryId" value={cat.id} />
+              <button 
+                type="submit" 
+                class={`text-red-500/50 hover:text-red-500 transition-colors text-[0.7rem] font-bold tracking-widest ${cat.worksCount > 0 ? 'opacity-20 cursor-not-allowed' : ''}`}
+                disabled={cat.worksCount > 0}
+                title={cat.worksCount > 0 ? "Cannot delete category with items" : "Delete Category"}
+              >
+                DELETE
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     ))}

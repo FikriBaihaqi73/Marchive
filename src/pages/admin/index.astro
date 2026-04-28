@@ -22,20 +22,20 @@ const stats = [
 
 
 <AdminLayout title="Dashboard Overview" activePage="dashboard">
-  <section class="stats-grid">
+  <section class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-[25px]">
     {stats.map(stat => (
-      <div class="stat-card">
-        <span class="stat-label">{stat.label}</span>
-        <span class="stat-value">{stat.value}</span>
+      <div class="bg-white/3 border border-glass-border p-[30px] rounded-xl transition-all duration-300 hover:border-accent hover:-translate-y-1">
+        <span class="text-[0.7rem] tracking-[0.15em] opacity-50 uppercase mb-2.5 block">{stat.label}</span>
+        <span class="text-[2.5rem] font-bold text-accent">{stat.value}</span>
       </div>
     ))}
   </section>
 
-  <section style="margin-top: 60px;">
-    <h2 style="font-family: var(--font-serif); margin-bottom: 30px;">Quick Actions</h2>
-    <div style="display: flex; gap: 20px;">
-      <a href="/admin/works/new" class="btn-primary" style="text-decoration: none;">Create New Work</a>
-      <a href="/admin/categories" class="btn-primary" style="text-decoration: none; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border);">Manage Categories</a>
+  <section class="mt-[60px]">
+    <h2 class="font-serif mb-[30px] text-2xl uppercase tracking-wider">Quick Actions</h2>
+    <div class="flex flex-wrap gap-5">
+      <a href="/admin/works/new" class="bg-accent text-black px-[30px] py-[15px] font-bold tracking-[0.1em] rounded-lg no-underline transition-all duration-300 hover:scale-105">Create New Work</a>
+      <a href="/admin/categories" class="bg-white/5 text-white border border-glass-border px-[30px] py-[15px] font-bold tracking-[0.1em] rounded-lg no-underline transition-all duration-300 hover:bg-white/10">Manage Categories</a>
     </div>
   </section>
 </AdminLayout>

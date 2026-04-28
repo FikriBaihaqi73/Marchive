@@ -61,84 +61,58 @@ const isSingle = work.type === 'single';
 ---
 
 <AdminLayout title={`Edit Metadata: ${work.title}`} activePage="works">
-  <div style="max-width: 900px;">
-    <div class="form-header">
-      <a href={`/admin/works/${workId}`} class="back-link">&larr; BACK TO MANAGEMENT</a>
-      <h1>Edit Work Metadata</h1>
-      <p style="opacity: 0.5;">Managing basic info for: <strong>{work.title}</strong></p>
+  <div class="max-w-[900px]">
+    <div class="mb-[50px]">
+      <a href={`/admin/works/${workId}`} class="text-[0.7rem] tracking-[0.1em] opacity-50 no-underline mb-[15px] block hover:opacity-100 hover:text-accent">&larr; BACK TO MANAGEMENT</a>
+      <h1 class="text-[2.5rem] font-serif leading-tight">Edit Work Metadata</h1>
+      <p class="opacity-50 mt-2">Managing basic info for: <strong>{work.title}</strong></p>
     </div>
 
-    {error && <div class="alert alert-error">{error}</div>}
-    {success && <div class="alert alert-success">{success}</div>}
+    {error && <div class="bg-red-500/10 text-red-500 p-[15px] rounded-lg mb-[30px] border border-red-500/20 text-[0.85rem]">{error}</div>}
+    {success && <div class="bg-green-500/10 text-green-400 p-[15px] rounded-lg mb-[30px] border border-green-500/20 text-[0.85rem]">{success}</div>}
 
-    <form class="admin-form" method="POST" id="edit-work-form">
+    <form class="flex flex-col gap-6" method="POST" id="edit-work-form">
       <input type="hidden" name="content" id="hidden-content" />
       <input type="hidden" name="action" id="form-action" value="update" />
 
-      <div class="form-group">
-        <label for="title">TITLE</label>
-        <input type="text" id="title" name="title" class="form-control" value={work.title} required />
+      <div class="flex flex-col gap-2">
+        <label for="title" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">TITLE</label>
+        <input type="text" id="title" name="title" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[1rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all" value={work.title} required />
       </div>
 
-      <div class="form-group">
-        <label for="categoryId">CATEGORY</label>
-        <select id="categoryId" name="categoryId" class="form-control" required>
+      <div class="flex flex-col gap-2">
+        <label for="categoryId" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">CATEGORY</label>
+        <select id="categoryId" name="categoryId" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all appearance-none cursor-pointer" required>
           {categories.map(cat => (
-            <option value={cat.id} selected={cat.id === work.categoryId}>{cat.name}</option>
+            <option value={cat.id} selected={cat.id === work.categoryId} class="bg-[#0a0a0a]">{cat.name}</option>
           ))}
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="cover">COVER IMAGE URL</label>
-        <input type="text" id="cover" name="cover" class="form-control" value={work.cover || ''} placeholder="https://image-link.com/photo.jpg" />
+      <div class="flex flex-col gap-2">
+        <label for="cover" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">COVER IMAGE URL</label>
+        <input type="text" id="cover" name="cover" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all" value={work.cover || ''} placeholder="https://image-link.com/photo.jpg" />
       </div>
 
       {isSingle ? (
-        <div class="form-group">
-          <label>CONTENT EDITOR</label>
+        <div class="flex flex-col gap-2">
+          <label class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">CONTENT EDITOR</label>
           <RichTextEditor initialValue={work.content || ''} />
         </div>
       ) : (
-        <div class="form-group">
-          <label for="synopsis">SYNOPSIS / DESCRIPTION</label>
-          <textarea id="synopsis" name="synopsis" class="form-control" rows="8">{work.synopsis}</textarea>
+        <div class="flex flex-col gap-2">
+          <label for="synopsis" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">SYNOPSIS / DESCRIPTION</label>
+          <textarea id="synopsis" name="synopsis" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all resize-none" rows="8">{work.synopsis}</textarea>
         </div>
       )}
 
-      <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px; display: flex; gap: 15px;">
-        <button type="submit" class="btn-primary">SAVE ALL CHANGES</button>
-        <button type="button" class="btn-secondary" style="border: 1px solid #ff4444; color: #ff4444;" id="delete-btn">DELETE WORK</button>
+      <div class="mt-10 pt-[30px] border-t border-white/5 flex gap-[15px]">
+        <button type="submit" class="bg-accent text-black px-8 py-4 rounded-lg font-bold text-[0.8rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer">SAVE ALL CHANGES</button>
+        <button type="button" class="bg-transparent text-red-500 border border-red-500 px-8 py-4 rounded-lg font-bold text-[0.8rem] tracking-[0.1em] hover:bg-red-500 hover:text-black transition-all cursor-pointer" id="delete-btn">DELETE WORK</button>
       </div>
     </form>
   </div>
 </AdminLayout>
-
-<style>
-  .form-header { margin-bottom: 50px; }
-  .back-link { font-size: 0.7rem; letter-spacing: 0.1em; opacity: 0.5; text-decoration: none; margin-bottom: 15px; display: block; }
-  .form-header h1 { font-size: 2.5rem; font-family: var(--font-serif); margin-bottom: 5px; }
-
-  .alert {
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    font-size: 0.85rem;
-    border: 1px solid;
-  }
-
-  .alert-error {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
-    border-color: rgba(255, 68, 68, 0.2);
-  }
-
-  .alert-success {
-    background: rgba(68, 255, 68, 0.1);
-    color: #44ff44;
-    border-color: rgba(68, 255, 68, 0.2);
-  }
-</style>
 
 <script is:inline>
   const form = document.getElementById('edit-work-form');

@@ -50,29 +50,30 @@ const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 
 ---
 
 <AdminLayout title={isSingle ? "Create Single Piece" : "Start New Book"} activePage="new-work">
-  <div style="max-width: 900px;" data-type={type} id="creation-container">
+  <div class="max-w-[900px]" data-type={type} id="creation-container">
     {error && (
-      <div style="background: rgba(255, 68, 68, 0.1); color: #ff4444; padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255, 68, 68, 0.2); font-size: 0.85rem;">
+      <div class="bg-red-500/10 text-red-500 p-[15px] rounded-lg mb-[30px] border border-red-500/20 text-[0.85rem]">
         {error}
       </div>
     )}
 
-    <form class="admin-form" method="POST" id="main-form">
+    <form class="flex flex-col gap-6" method="POST" id="main-form">
       <!-- Hidden input for Rich Text content -->
       <input type="hidden" name="content" id="hidden-content" />
-      <div class="form-group">
-        <label for="title">{isSingle ? "TITLE OF YOUR PIECE" : "BOOK TITLE"}</label>
-        <input type="text" id="title" name="title" class="form-control" placeholder={isSingle ? "e.g. Midnight Sonnet" : "e.g. Chronicles of Marchive"} required />
+      
+      <div class="flex flex-col gap-2">
+        <label for="title" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">{isSingle ? "TITLE OF YOUR PIECE" : "BOOK TITLE"}</label>
+        <input type="text" id="title" name="title" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[1.1rem] font-serif focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all placeholder:opacity-20" placeholder={isSingle ? "e.g. Midnight Sonnet" : "e.g. Chronicles of Marchive"} required />
       </div>
 
-      <div class="form-group">
-        <label for="category">CATEGORY</label>
-        <select id="category" name="categoryId" class="form-control">
+      <div class="flex flex-col gap-2">
+        <label for="category" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">CATEGORY</label>
+        <select id="category" name="categoryId" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all appearance-none cursor-pointer">
           {filteredCategories.map(cat => (
-            <option value={cat.id}>{cat.name}</option>
+            <option value={cat.id} class="bg-[#0a0a0a]">{cat.name}</option>
           ))}
           {filteredCategories.length === 0 && (
-            <option disabled>No categories found for this type</option>
+            <option disabled class="bg-[#0a0a0a]">No categories found for this type</option>
           )}
         </select>
       </div>
@@ -80,30 +81,30 @@ const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 
 
       <!-- SINGLE PIECE EDITOR -->
       <div id="single-editor-area" style={isSingle ? "display: block;" : "display: none;"}>
-        <div class="form-group">
-          <label>CONTENT (YOUR WORK)</label>
+        <div class="flex flex-col gap-2">
+          <label class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">CONTENT (YOUR WORK)</label>
           <RichTextEditor placeholder="Tuliskan baris puisi atau narasi karya Anda di sini..." />
         </div>
       </div>
 
       <!-- BOOK SYNOPSIS AREA -->
       <div id="book-metadata-area" style={isSingle ? "display: none;" : "display: block;"}>
-        <div class="form-group">
-          <label for="synopsis">SYNOPSIS / DESCRIPTION</label>
-          <textarea id="synopsis" name="synopsis" class="form-control" rows="6" placeholder="What is this book about?"></textarea>
+        <div class="flex flex-col gap-2">
+          <label for="synopsis" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">SYNOPSIS / DESCRIPTION</label>
+          <textarea id="synopsis" name="synopsis" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all placeholder:opacity-20 resize-none" rows="6" placeholder="What is this book about?"></textarea>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="cover">COVER / THUMBNAIL IMAGE URL</label>
-        <input type="text" id="cover" name="cover" class="form-control" placeholder="https://image-link.com/cover.jpg" />
+      <div class="flex flex-col gap-2">
+        <label for="cover" class="text-[0.65rem] tracking-[0.2em] font-bold opacity-40 uppercase ml-1">COVER / THUMBNAIL IMAGE URL</label>
+        <input type="text" id="cover" name="cover" class="bg-white/5 border border-white/10 rounded-lg p-[15px_20px] text-white text-[0.9rem] focus:outline-none focus:border-accent/50 focus:bg-white/10 transition-all placeholder:opacity-20" placeholder="https://image-link.com/cover.jpg" />
       </div>
 
-      <div style="display: flex; gap: 20px; align-items: center; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
-        <button type="submit" class="btn-primary" id="submit-btn">
+      <div class="flex gap-5 items-center mt-10 pt-[30px] border-t border-white/5">
+        <button type="submit" class="bg-accent text-black px-10 py-4 rounded-lg font-bold text-[0.85rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer" id="submit-btn">
           {isSingle ? "PUBLISH PIECE" : "CREATE BOOK"}
         </button>
-        <a href="/admin/works" style="color: #fff; opacity: 0.5; text-decoration: none; font-size: 0.8rem;">Cancel</a>
+        <a href="/admin/works" class="text-white opacity-50 no-underline text-[0.8rem] hover:opacity-100 hover:text-accent transition-all">Cancel</a>
       </div>
     </form>
   </div>
@@ -131,7 +132,6 @@ const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 
       }
     });
   </script>
-
 </AdminLayout>
 
 

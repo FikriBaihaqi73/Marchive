@@ -35,70 +35,98 @@ if (work.type === 'book') {
     .where(eq(chaptersTable.workId, workId))
     .orderBy(asc(chaptersTable.order));
 }
+
+// 3. Handle POST Actions
+if (Astro.request.method === 'POST') {
+  const data = await Astro.request.formData();
+  const action = data.get('action')?.toString();
+
+  if (action === 'delete-work') {
+    await db.delete(worksTable).where(eq(worksTable.id, workId));
+    return Astro.redirect('/admin/works');
+  }
+
+  if (action === 'delete-chapter') {
+    const chapterId = parseInt(data.get('chapterId')?.toString() || '0');
+    if (chapterId) {
+      await db.delete(chaptersTable).where(eq(chaptersTable.id, chapterId));
+      return Astro.redirect(`/admin/works/${workId}`);
+    }
+  }
+}
 ---
 
 <AdminLayout title={`Manage: ${work.title}`} activePage="works">
-  <div class="detail-header-admin">
+  <div class="flex flex-col lg:flex-row justify-between items-end mb-[50px] border-b border-glass-border pb-[30px] gap-5">
     <div class="header-left">
-      <a href="/admin/works" class="back-link">&larr; BACK TO ARCHIVE</a>
-      <h1>{work.title}</h1>
-      <div class="status-row">
-        <span class={`status-badge status-${work.status}`}>{work.status.toUpperCase()}</span>
-        <span class="type-tag">{work.type === 'book' ? '📚 BOOK' : '📄 SINGLE PIECE'}</span>
-        <span class="category-tag">{work.categoryName}</span>
+      <a href="/admin/works" class="text-[0.7rem] tracking-[0.1em] opacity-50 no-underline mb-[15px] block hover:opacity-100 hover:text-accent">&larr; BACK TO ARCHIVE</a>
+      <h1 class="text-[2.5rem] font-serif mb-[15px] leading-tight">{work.title}</h1>
+      <div class="flex gap-[15px] items-center">
+        <span class={`px-3 py-1 rounded-full text-[0.65rem] font-bold uppercase ${work.status === 'published' ? 'bg-green-500/10 text-green-400' : 'bg-orange-500/10 text-orange-400'}`}>{work.status.toUpperCase()}</span>
+        <span class="text-[0.65rem] tracking-[0.1em] font-bold opacity-60 uppercase">{work.type === 'book' ? '📚 BOOK' : '📄 SINGLE PIECE'}</span>
+        <span class="text-[0.65rem] tracking-[0.1em] font-bold opacity-60 uppercase">{work.categoryName}</span>
       </div>
     </div>
-    <div class="header-actions">
-      <a href={`/admin/works/${work.id}/edit`} class="btn-secondary" style="text-decoration: none;">EDIT METADATA</a>
-      <button class="btn-primary">PUBLISH WORK</button>
+    <div class="flex gap-[15px] flex-wrap">
+      <a href={`/admin/works/${work.id}/edit`} class="bg-white/5 text-white border border-glass-border px-5 py-3 rounded-lg font-bold text-[0.8rem] no-underline hover:bg-white/10 transition-all">EDIT METADATA</a>
+      <button class="bg-accent text-black px-5 py-3 rounded-lg font-bold text-[0.8rem] hover:scale-105 transition-all">PUBLISH WORK</button>
+      <button type="button" class="bg-transparent text-red-500 border border-red-500 px-5 py-3 rounded-lg font-bold text-[0.8rem] hover:bg-red-500 hover:text-black transition-all" id="delete-work-btn">DELETE WORK</button>
     </div>
   </div>
 
-  <div class="detail-grid-admin">
+  <form id="delete-work-form" method="POST" class="hidden">
+    <input type="hidden" name="action" value="delete-work" />
+  </form>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[250px,1fr] gap-[50px]">
     <!-- Sidebar Info -->
-    <aside class="info-sidebar">
-      <div class="card-admin cover-card">
-        <img src={work.cover || "https://via.placeholder.com/225x337"} alt={work.title} />
+    <aside class="flex flex-col gap-5">
+      <div class="bg-white/3 border border-glass-border p-2.5 rounded-xl">
+        <img src={work.cover || "https://via.placeholder.com/225x337"} alt={work.title} class="w-full aspect-[2/3] object-cover rounded-lg" />
       </div>
       
-      <div class="card-admin stats-card">
-        <div class="stat-item">
-          <span class="label">CREATED</span>
-          <span class="value">{new Date(work.createdAt).toLocaleDateString()}</span>
+      <div class="bg-white/3 border border-glass-border p-5 rounded-xl">
+        <div class="flex flex-col gap-[5px] mb-[15px]">
+          <span class="text-[0.6rem] tracking-[0.1em] opacity-40 font-bold uppercase">CREATED</span>
+          <span class="text-[0.9rem] font-semibold">{new Date(work.createdAt).toLocaleDateString()}</span>
         </div>
         {work.type === 'book' && (
-          <div class="stat-item">
-            <span class="label">CHAPTERS</span>
-            <span class="value">{chapters.length}</span>
+          <div class="flex flex-col gap-[5px]">
+            <span class="text-[0.6rem] tracking-[0.1em] opacity-40 font-bold uppercase">CHAPTERS</span>
+            <span class="text-[0.9rem] font-semibold">{chapters.length}</span>
           </div>
         )}
       </div>
     </aside>
 
     <!-- Main Content Area -->
-    <main class="content-area-admin">
+    <main>
       {work.type === 'book' ? (
-        <div class="chapters-management">
-          <div class="section-header-row">
-            <h2>CHAPTER LIST</h2>
-            <a href={`/admin/works/${work.id}/chapters/new`} class="btn-add-chapter">+ ADD NEW CHAPTER</a>
+        <div>
+          <div class="flex justify-between items-center mb-[30px]">
+            <h2 class="text-[0.8rem] tracking-[0.2em] opacity-50 font-bold uppercase">CHAPTER LIST</h2>
+            <a href={`/admin/works/${work.id}/chapters/new`} class="text-[0.7rem] font-bold tracking-[0.1em] text-accent border border-accent p-[10px_20px] no-underline transition-all hover:bg-accent hover:text-black">+ ADD NEW CHAPTER</a>
           </div>
 
-          <div class="chapters-list-admin">
+          <div class="flex flex-col gap-[15px]">
             {chapters.map((chapter) => (
-              <div class="chapter-admin-card">
-                <div class="ch-info">
-                  <span class="ch-num">CH {chapter.order}</span>
-                  <h3>{chapter.title}</h3>
+              <div class="bg-white/2 border border-glass-border p-[20px_30px] flex justify-between items-center rounded-lg hover:border-accent/50 transition-all">
+                <div class="flex items-center gap-[30px]">
+                  <span class="text-[0.65rem] font-extrabold opacity-30 w-[60px] uppercase">CH {chapter.order}</span>
+                  <h3 class="text-[1rem] font-medium">{chapter.title}</h3>
                 </div>
-                <div class="ch-actions">
-                  <a href={`/admin/works/${work.id}/chapters/${chapter.id}`} class="btn-edit-ch">EDIT</a>
-                  <button class="btn-delete-ch">&times;</button>
+                <div class="flex gap-[15px] items-center">
+                  <a href={`/admin/works/${work.id}/chapters/${chapter.id}`} class="text-[0.7rem] font-bold text-white opacity-60 no-underline hover:opacity-100 hover:text-accent">EDIT</a>
+                  <form method="POST" onsubmit="return confirm('Delete this chapter?');" class="inline">
+                    <input type="hidden" name="action" value="delete-chapter" />
+                    <input type="hidden" name="chapterId" value={chapter.id} />
+                    <button type="submit" class="text-[1.2rem] text-red-500 opacity-50 hover:opacity-100">&times;</button>
+                  </form>
                 </div>
               </div>
             ))}
             {chapters.length === 0 && (
-              <div class="empty-state-ch">
+              <div class="text-center py-20 opacity-30 border border-dashed border-glass-border rounded-lg">
                 <p>This book has no chapters yet. Start your story!</p>
               </div>
             )}
@@ -106,13 +134,13 @@ if (work.type === 'book') {
         </div>
       ) : (
         <div class="single-piece-management">
-          <div class="section-header-row">
-            <h2>CONTENT PREVIEW</h2>
-            <a href={`/admin/works/${work.id}/edit`} class="btn-add-chapter">EDIT CONTENT</a>
+          <div class="flex justify-between items-center mb-[30px]">
+            <h2 class="text-[0.8rem] tracking-[0.2em] opacity-50 font-bold uppercase">CONTENT PREVIEW</h2>
+            <a href={`/admin/works/${work.id}/edit`} class="text-[0.7rem] font-bold tracking-[0.1em] text-accent border border-accent p-[10px_20px] no-underline transition-all hover:bg-accent hover:text-black">EDIT CONTENT</a>
           </div>
-          <div class="content-preview-box">
-             {work.synopsis && <div class="synopsis-box"><strong>Synopsis:</strong> <p>{work.synopsis}</p></div>}
-             <div class="content-body-admin" style="opacity: 0.5; font-style: italic;">
+          <div class="bg-white/3 border border-glass-border p-[30px] rounded-xl">
+             {work.synopsis && <div class="mb-[30px] pb-5 border-b border-white/5"><strong class="text-[0.7rem] tracking-[0.1em] block mb-2.5 opacity-40 uppercase">Synopsis:</strong> <p>{work.synopsis}</p></div>}
+             <div class="opacity-50 italic">
                Content editing is available via the "Edit Content" button.
              </div>
           </div>
@@ -122,220 +150,11 @@ if (work.type === 'book') {
   </div>
 </AdminLayout>
 
-<style>
-  .detail-header-admin {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 50px;
-    border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 30px;
-  }
+<script is:inline>
+  document.getElementById('delete-work-btn')?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this entire work? This will delete all its chapters and cannot be undone.')) {
+      document.getElementById('delete-work-form')?.submit();
+    }
+  });
+</script>
 
-  .back-link {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    opacity: 0.5;
-    text-decoration: none;
-    margin-bottom: 15px;
-    display: block;
-  }
-
-  .detail-header-admin h1 {
-    font-size: 2.5rem;
-    font-family: var(--font-serif);
-    margin-bottom: 15px;
-  }
-
-  .status-row {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-  }
-
-  .type-tag, .category-tag {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-    opacity: 0.6;
-    text-transform: uppercase;
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 15px;
-  }
-
-  .detail-grid-admin {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 50px;
-  }
-
-  .info-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .card-admin {
-    background: var(--admin-card-bg);
-    border: 1px solid var(--glass-border);
-    padding: 20px;
-    border-radius: 12px;
-  }
-
-  .cover-card {
-    padding: 10px;
-  }
-
-  .cover-card img {
-    width: 100%;
-    aspect-ratio: 2/3;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 15px;
-  }
-
-  .stat-item:last-child { margin-bottom: 0; }
-
-  .stat-item .label {
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    opacity: 0.4;
-    font-weight: 700;
-  }
-
-  .stat-item .value {
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  /* Content Management */
-  .section-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-
-  .section-header-row h2 {
-    font-size: 0.8rem;
-    letter-spacing: 0.2em;
-    opacity: 0.5;
-  }
-
-  .btn-add-chapter {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    color: var(--accent-color);
-    border: 1px solid var(--accent-color);
-    padding: 10px 20px;
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-
-  .btn-add-chapter:hover {
-    background: var(--accent-color);
-    color: #000;
-  }
-
-  .chapters-list-admin {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .chapter-admin-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--glass-border);
-    padding: 20px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 8px;
-  }
-
-  .ch-info {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-  }
-
-  .ch-num {
-    font-size: 0.65rem;
-    font-weight: 800;
-    opacity: 0.3;
-    width: 60px;
-  }
-
-  .ch-info h3 {
-    font-size: 1rem;
-    font-weight: 500;
-  }
-
-  .ch-actions {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-  }
-
-  .btn-edit-ch {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #fff;
-    opacity: 0.6;
-    text-decoration: none;
-  }
-
-  .btn-edit-ch:hover { opacity: 1; color: var(--accent-color); }
-
-  .btn-delete-ch {
-    font-size: 1.2rem;
-    color: #ff4444;
-    opacity: 0.5;
-  }
-
-  .btn-delete-ch:hover { opacity: 1; }
-
-  .empty-state-ch {
-    text-align: center;
-    padding: 80px 0;
-    opacity: 0.3;
-    border: 1px dashed var(--glass-border);
-    border-radius: 8px;
-  }
-
-  .content-preview-box {
-    background: var(--admin-card-bg);
-    border: 1px solid var(--glass-border);
-    padding: 30px;
-    border-radius: 12px;
-  }
-
-  .synopsis-box {
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .synopsis-box strong {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    display: block;
-    margin-bottom: 10px;
-    opacity: 0.4;
-  }
-
-  @media (max-width: 768px) {
-    .detail-grid-admin { grid-template-columns: 1fr; }
-    .detail-header-admin { flex-direction: column; align-items: flex-start; gap: 20px; }
-  }
-</style>
