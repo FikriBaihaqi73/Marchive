@@ -102,7 +102,10 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
           </div>
         ) : (
           <div class="content-standard">
-            <div class="text-[1.25rem]! leading-[2]! whitespace-pre-line opacity-90! italic ql-editor" set:html={work.content}>
+            <div 
+              class={`text-[1.15rem] leading-[2] opacity-100 text-white ql-editor ${work.categoryName === 'Puisi' ? 'italic' : ''}`} 
+              set:html={work.content}
+            >
             </div>
             {work.categoryName === 'Puisi' && <div class="w-10 h-[1px] bg-accent mt-[60px]"></div>}
           </div>

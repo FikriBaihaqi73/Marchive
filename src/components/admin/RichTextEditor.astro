@@ -171,20 +171,20 @@ const { placeholder = "Mulai menulis keajaiban...", initialValue = "" } = Astro.
   .custom-size-wrapper {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.2);
     padding: 2px 8px;
     border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    height: 26px;
   }
 
   #manual-size-input {
     background: transparent;
     border: none;
-    color: var(--color-accent);
-    width: 28px;
-    font-size: 0.8rem;
-    font-weight: 700;
+    color: #ffffff; /* Pure White for maximum visibility */
+    width: 32px;
+    font-size: 0.9rem;
+    font-weight: 800;
     text-align: center;
     padding: 0;
     outline: none;
@@ -199,12 +199,12 @@ const { placeholder = "Mulai menulis keajaiban...", initialValue = "" } = Astro.
   }
 
   .px-label {
-    font-size: 0.6rem;
-    opacity: 0.5;
+    font-size: 0.65rem;
+    color: #c5a059; /* Accent Gold for the unit */
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-left: 2px;
+    margin-left: 4px;
     line-height: 1;
     display: inline-block;
   }
@@ -213,14 +213,15 @@ const { placeholder = "Mulai menulis keajaiban...", initialValue = "" } = Astro.
   .ql-container.ql-snow {
     border: none !important;
     font-family: inherit !important;
-    font-size: 1.1rem;
-    color: #e0e0e0;
+    font-size: 1.15rem;
+    color: #ffffff;
   }
 
   .ql-editor {
-    min-height: 400px;
+    min-height: 500px;
     padding: 40px !important;
-    line-height: 1.8;
+    line-height: 2;
+    background: transparent;
   }
 
   .ql-editor.ql-blank::before {
