@@ -65,27 +65,28 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
       <div class="text-[0.75rem] bg-accent text-black px-4 py-1.5 font-bold tracking-[0.15em] uppercase leading-none">{work.categoryName || 'UNCATEGORIZED'}</div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr,1.5fr] gap-20 items-start">
-      <!-- Title and Main Info -->
-      <header class="col-span-full mb-20 text-center">
-        <h1 class="text-[3rem] lg:text-[5rem] mb-2.5 fade-in">{work.title}</h1>
-        <div class="text-[0.8rem] tracking-[0.3em] opacity-50 fade-in uppercase">{formattedDate}</div>
-      </header>
-
-      <div class="fade-in flex justify-center lg:justify-start">
-        <img src={work.cover || "https://via.placeholder.com/600x800"} alt={work.title} class="w-full max-w-[400px] aspect-[2/3] object-cover border border-glass-border shadow-2xl" />
+    <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-[60px] lg:gap-20 items-start">
+      <!-- Left Column: Cover -->
+      <div class="fade-in flex justify-center lg:justify-start lg:sticky lg:top-[120px]">
+        <img src={work.cover || "https://via.placeholder.com/600x800"} alt={work.title} class="w-full aspect-[2/3] object-cover border border-glass-border shadow-2xl" />
       </div>
 
+      <!-- Right Column: Info & Content -->
       <div class="fade-in">
+        <header class="mb-[60px] text-left">
+          <h1 class="text-[3rem] lg:text-[4.5rem] mb-5 leading-[1.1] font-serif">{work.title}</h1>
+          <div class="text-[0.8rem] tracking-[0.3em] opacity-50 uppercase">{formattedDate}</div>
+        </header>
+
         {work.type === 'book' ? (
           <div>
             <section class="mb-[60px]">
-              <h2 class="text-[0.8rem] tracking-[0.2em] text-accent mb-[30px] border-b border-glass-border pb-2.5 w-fit uppercase font-serif">SYNOPSIS</h2>
-              <p class="text-[1.1rem] leading-[1.8] opacity-80">{work.synopsis || "No synopsis available."}</p>
+              <h2 class="text-[0.7rem] tracking-[0.2em] text-accent mb-6 border-b border-glass-border pb-2.5 w-fit uppercase font-bold">SYNOPSIS</h2>
+              <p class="text-[1.1rem] leading-[1.8] opacity-80 font-sans">{work.synopsis || "No synopsis available."}</p>
             </section>
             
             <section>
-              <h2 class="text-[0.8rem] tracking-[0.2em] text-accent mb-[30px] border-b border-glass-border pb-2.5 w-fit uppercase font-serif">CHAPTERS</h2>
+              <h2 class="text-[0.7rem] tracking-[0.2em] text-accent mb-6 border-b border-glass-border pb-2.5 w-fit uppercase font-bold">CHAPTERS</h2>
               <div class="flex flex-col gap-5">
                 {chapters.map((chapter) => (
                   <a href={`/works/${work.id}/${chapter.slug || chapter.id}`} class="p-[30px] border border-glass-border flex items-center justify-between transition-all duration-300 no-underline text-inherit bg-white/2 hover:border-accent hover:bg-accent/5 hover:translate-x-2.5 group">
@@ -102,6 +103,7 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
           </div>
         ) : (
           <div class="content-standard">
+            <h2 class="text-[0.7rem] tracking-[0.2em] text-accent mb-10 border-b border-glass-border pb-2.5 w-fit uppercase font-bold">CONTENT</h2>
             <div 
               class={`text-[1.15rem] leading-[2] opacity-100 text-white ql-editor ${work.categoryName === 'Puisi' ? 'italic' : ''}`} 
               set:html={work.content}
