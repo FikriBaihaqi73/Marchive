@@ -65,34 +65,41 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
       <div class="text-[0.75rem] bg-accent text-black px-4 py-1.5 font-bold tracking-[0.15em] uppercase leading-none">{work.categoryName || 'UNCATEGORIZED'}</div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-[60px] lg:gap-20 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-12 lg:gap-20 items-start">
+      <!-- Header for Mobile (Shows above image) -->
+      <header class="lg:hidden">
+        <h1 class="text-[2.5rem] leading-[1.1] font-serif mb-4">{work.title}</h1>
+        <div class="text-[0.7rem] tracking-[0.2em] opacity-50 uppercase">{formattedDate}</div>
+      </header>
+
       <!-- Left Column: Cover -->
-      <div class="fade-in flex justify-center lg:justify-start lg:sticky lg:top-[120px]">
-        <img src={work.cover || "https://via.placeholder.com/600x800"} alt={work.title} class="w-full aspect-[2/3] object-cover border border-glass-border shadow-2xl" />
+      <div class="fade-in flex justify-center lg:justify-start lg:sticky lg:top-[120px] order-1 lg:order-none">
+        <img src={work.cover || "https://via.placeholder.com/600x800"} alt={work.title} class="w-full max-md:max-w-[320px] aspect-[2/3] object-cover border border-glass-border shadow-2xl" />
       </div>
 
       <!-- Right Column: Info & Content -->
-      <div class="fade-in">
-        <header class="mb-[60px] text-left">
+      <div class="fade-in order-2 lg:order-none">
+        <!-- Header for Desktop (Hidden on mobile) -->
+        <header class="hidden lg:block mb-[60px] text-left">
           <h1 class="text-[3rem] lg:text-[4.5rem] mb-5 leading-[1.1] font-serif">{work.title}</h1>
           <div class="text-[0.8rem] tracking-[0.3em] opacity-50 uppercase">{formattedDate}</div>
         </header>
 
         {work.type === 'book' ? (
-          <div>
+          <div class="mt-10 lg:mt-0">
             <section class="mb-[60px]">
               <h2 class="text-[0.7rem] tracking-[0.2em] text-accent mb-6 border-b border-glass-border pb-2.5 w-fit uppercase font-bold">SYNOPSIS</h2>
-              <p class="text-[1.1rem] leading-[1.8] opacity-80 font-sans">{work.synopsis || "No synopsis available."}</p>
+              <p class="text-[1.05rem] lg:text-[1.1rem] leading-[1.8] opacity-80 font-sans">{work.synopsis || "No synopsis available."}</p>
             </section>
             
             <section>
               <h2 class="text-[0.7rem] tracking-[0.2em] text-accent mb-6 border-b border-glass-border pb-2.5 w-fit uppercase font-bold">CHAPTERS</h2>
-              <div class="flex flex-col gap-5">
+              <div class="flex flex-col gap-4 lg:gap-5">
                 {chapters.map((chapter) => (
-                  <a href={`/works/${work.id}/${chapter.slug || chapter.id}`} class="p-[30px] border border-glass-border flex items-center justify-between transition-all duration-300 no-underline text-inherit bg-white/2 hover:border-accent hover:bg-accent/5 hover:translate-x-2.5 group">
-                    <span class="text-[0.7rem] opacity-40 font-extrabold uppercase">CH {chapter.order}</span>
-                    <h3 class="font-sans font-medium text-[1rem] flex-grow ml-10">{chapter.title}</h3>
-                    <span class="text-[0.7rem] font-bold tracking-[0.1em] opacity-60 group-hover:opacity-100">READ &rarr;</span>
+                  <a href={`/works/${work.id}/${chapter.slug || chapter.id}`} class="p-6 lg:p-[30px] border border-glass-border flex items-center justify-between transition-all duration-300 no-underline text-inherit bg-white/2 hover:border-accent hover:bg-accent/5 lg:hover:translate-x-2.5 group">
+                    <span class="text-[0.6rem] lg:text-[0.7rem] opacity-40 font-extrabold uppercase">CH {chapter.order}</span>
+                    <h3 class="font-sans font-medium text-[0.95rem] lg:text-[1rem] flex-grow ml-6 lg:ml-10">{chapter.title}</h3>
+                    <span class="text-[0.6rem] lg:text-[0.7rem] font-bold tracking-[0.1em] opacity-60 group-hover:opacity-100">READ &rarr;</span>
                   </a>
                 ))}
                 {chapters.length === 0 && (
@@ -102,10 +109,10 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
             </section>
           </div>
         ) : (
-          <div class="content-standard">
-            <h2 class="text-[0.7rem] tracking-[0.2em] text-accent mb-10 border-b border-glass-border pb-2.5 w-fit uppercase font-bold">CONTENT</h2>
+          <div class="content-standard mt-10 lg:mt-0">
+            <h2 class="text-[0.7rem] tracking-[0.2em] text-accent mb-8 lg:mb-10 border-b border-glass-border pb-2.5 w-fit uppercase font-bold">CONTENT</h2>
             <div 
-              class={`text-[1.15rem] leading-[2] opacity-100 text-white ql-editor ${work.categoryName === 'Puisi' ? 'italic' : ''}`} 
+              class={`text-[1.05rem] lg:text-[1.15rem] leading-[1.8] lg:leading-[2] opacity-100 text-white ql-editor ${work.categoryName === 'Puisi' ? 'italic' : ''}`} 
               set:html={work.content}
             >
             </div>
