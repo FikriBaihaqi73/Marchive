@@ -62,7 +62,7 @@ const featuredWorks = await db
                   <img 
                     src={work.cover || "https://via.placeholder.com/600x800"} 
                     alt={work.title} 
-                    class="group-hover:scale-110"
+                    class="group-hover:scale-[1.05]"
                   />
                 </div>
               </a>
@@ -172,8 +172,8 @@ const featuredWorks = await db
 
   .image-link-wrap {
     display: block;
-    width: 90%;
-    margin-left: auto;
+    width: 95%;
+    margin-right: 60px;
     cursor: pointer;
   }
 
@@ -191,7 +191,9 @@ const featuredWorks = await db
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 1.5s ease, filter 1.5s ease;
+    transition: transform 3s cubic-bezier(0.16, 1, 0.3, 1), 
+                scale 3s cubic-bezier(0.16, 1, 0.3, 1), 
+                filter 3s cubic-bezier(0.16, 1, 0.3, 1);
     filter: brightness(0.7);
   }
 
@@ -202,8 +204,8 @@ const featuredWorks = await db
 
   .slide-caption {
     margin-top: 25px;
-    width: 90%;
-    margin-left: auto;
+    width: 95%;
+    margin-right: 60px;
     text-align: left;
   }
 
@@ -228,8 +230,8 @@ const featuredWorks = await db
   .slider-controls-ui {
     position: absolute;
     top: 0;
-    right: 0;
-    width: 90%;
+    left: 0;
+    width: 95%;
     height: 100%;
     pointer-events: none;
     z-index: 100;
