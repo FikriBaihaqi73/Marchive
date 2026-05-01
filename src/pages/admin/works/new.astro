@@ -16,6 +16,7 @@ if (Astro.request.method === 'POST') {
   try {
     const data = await Astro.request.formData();
     const title = data.get('title')?.toString();
+    const status = data.get('status')?.toString() || (isSingle ? 'published' : 'draft');
     const categoryId = parseInt(data.get('categoryId')?.toString() || '0');
     const coverFile = data.get('cover') as File;
     const synopsis = data.get('synopsis')?.toString();
@@ -45,7 +46,7 @@ if (Astro.request.method === 'POST') {
           cover: coverUrl,
           synopsis: isSingle ? null : synopsis,
           content: isSingle ? content : null,
-          status: isSingle ? 'published' : 'draft', 
+          status: status as any, 
         }).returning();
 
         return Astro.redirect('/admin/works');
@@ -121,8 +122,11 @@ const filteredCategories = allCategories.filter(cat => cat.type === (isSingle ? 
       </div>
 
       <div class="flex gap-5 items-center mt-10 pt-[30px] border-t border-white/5">
-        <button type="submit" class="bg-accent text-black px-10 py-4 rounded-lg font-bold text-[0.85rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-wait" id="submit-btn">
+        <button type="submit" name="status" value="published" class="bg-accent text-black px-10 py-4 rounded-lg font-bold text-[0.85rem] tracking-[0.1em] transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-wait submit-btn" id="submit-btn">
           {isSingle ? "PUBLISH PIECE" : "CREATE BOOK"}
+        </button>
+        <button type="submit" name="status" value="draft" class="bg-white/10 text-white border border-white/20 px-8 py-4 rounded-lg font-bold text-[0.85rem] tracking-[0.1em] transition-all hover:bg-white/20 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-wait submit-btn">
+          SAVE AS DRAFT
         </button>
         <a href="/admin/works" class="text-white opacity-50 no-underline text-[0.8rem] hover:opacity-100 hover:text-accent transition-all">Cancel</a>
       </div>
