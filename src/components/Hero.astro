@@ -34,55 +34,57 @@ const featuredWorks = await db
     </div>
 
     <!-- Sliding Part: Right Side -->
-    <div class="hero-slider-side">
-      <div class="slides-inner" id="hero-slides">
-        {featuredWorks.length === 0 && (
-          <div class="hero-slide active">
-            <div class="slide-content-wrap">
-              <div class="image-link-wrap">
-                <div class="image-box flex items-center justify-center">
-                  <span class="opacity-20 text-[0.8rem] tracking-[0.5em]">NO ENTRIES YET</span>
+      <div class="hero-slider-side">
+        <div class="slides-inner" id="hero-slides">
+          {featuredWorks.length === 0 && (
+            <div class="hero-slide active">
+              <div class="slide-content-wrap">
+                <div class="image-link-wrap">
+                  <div class="image-box flex items-center justify-center">
+                    <span class="opacity-20 text-[0.8rem] tracking-[0.5em]">NO ENTRIES YET</span>
+                  </div>
+                  <div class="slide-caption">
+                    <span class="cat">SYSTEM</span>
+                    <h3 class="work-title">Welcome to Marchive</h3>
+                  </div>
                 </div>
+              </div>
+            </div>
+          )}
+          {featuredWorks.map((work, index) => (
+            <div 
+              class={`hero-slide ${index === 0 ? 'active' : ''}`} 
+              data-index={index}
+            >
+              <div class="slide-content-wrap">
+                <a href={`/works/${work.id}`} class="image-link-wrap group">
+                  <div class="image-box">
+                    <img 
+                      src={work.cover || "https://via.placeholder.com/600x800"} 
+                      alt={work.title} 
+                      class="group-hover:scale-[1.05]"
+                    />
+                  </div>
+                </a>
+
                 <div class="slide-caption">
-                  <span class="cat">SYSTEM</span>
-                  <h3 class="work-title">Welcome to Marchive</h3>
+                  <div class="slide-progress">
+                    {featuredWorks.map((_, i) => (
+                      <span 
+                        class={`dot-line ${i === index ? 'active' : ''}`} 
+                        data-index={i}
+                      ></span>
+                    ))}
+                  </div>
+                  <span class="cat">{work.categoryName || 'UNCATEGORIZED'}</span>
+                  <h2 class="work-title">{work.title}</h2>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-        {featuredWorks.map((work, index) => (
-          <div 
-            class={`hero-slide ${index === 0 ? 'active' : ''}`} 
-            data-index={index}
-          >
-            <div class="slide-content-wrap">
-              <a href={`/works/${work.id}`} class="image-link-wrap group">
-                <div class="image-box">
-                  <img 
-                    src={work.cover || "https://via.placeholder.com/600x800"} 
-                    alt={work.title} 
-                    class="group-hover:scale-[1.05]"
-                  />
-                </div>
-              </a>
+          ))}
+        </div>
 
-              <div class="slide-caption">
-                <div class="slide-progress">
-                  {featuredWorks.map((_, i) => (
-                    <span 
-                      class={`dot-line ${i === index ? 'active' : ''}`} 
-                      data-index={i}
-                    ></span>
-                  ))}
-                </div>
-                <span class="cat">{work.categoryName || 'UNCATEGORIZED'}</span>
-                <h2 class="work-title">{work.title}</h2>
-              </div>
-            </div>
-          </div>
-        ))}
-
+        <!-- Move controls outside slides to avoid overlap -->
         <div class="slider-controls-ui">
           <div class="arrows-wrap">
             <button id="prev-hero" class="nav-btn-new" aria-label="Previous">
@@ -234,7 +236,7 @@ const featuredWorks = await db
     width: 95%;
     height: 100%;
     pointer-events: none;
-    z-index: 100;
+    z-index: 200;
   }
 
   .arrows-wrap {

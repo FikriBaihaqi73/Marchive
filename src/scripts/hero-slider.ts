@@ -1,4 +1,5 @@
 export function initHybridSlider() {
+  console.log('Initializing Hero Slider...');
   const slides = document.querySelectorAll('.hero-slide');
   const prevBtn = document.getElementById('prev-hero');
   const nextBtn = document.getElementById('next-hero');
@@ -24,12 +25,18 @@ export function initHybridSlider() {
     current = index;
   }
 
+  // Use a named function for listeners to avoid duplicates if necessary, 
+  // though astro:page-load usually handles clean slate well.
   prevBtn?.addEventListener('click', (e) => {
+    console.log('Hero Prev Clicked');
+    e.preventDefault();
     e.stopPropagation();
     showSlide(current - 1);
   });
   
   nextBtn?.addEventListener('click', (e) => {
+    console.log('Hero Next Clicked');
+    e.preventDefault();
     e.stopPropagation();
     showSlide(current + 1);
   });
@@ -43,11 +50,15 @@ export function initHybridSlider() {
     });
   });
 
-  // Auto slide
-  const autoSlideInterval = setInterval(() => showSlide(current + 1), 7000);
+  // Auto slide - Clear existing if any (basic protection)
+  if ((window as any).heroInterval) clearInterval((window as any).heroInterval);
+  (window as any).heroInterval = setInterval(() => showSlide(current + 1), 7000);
 }
 
-// Auto-init
+// Support for View Transitions / ClientRouter
+document.addEventListener('astro:page-load', initHybridSlider);
+
+// Initial load
 if (typeof document !== 'undefined') {
   initHybridSlider();
 }
