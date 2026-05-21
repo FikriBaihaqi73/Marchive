@@ -80,28 +80,13 @@ const { placeholder = "Mulai menulis keajaiban...", initialValue = "" } = Astro.
     sizeInput.addEventListener('mousedown', (e) => e.stopPropagation());
     sizeInput.addEventListener('click', (e) => e.stopPropagation());
 
-    quill.on('text-change', () => {
-      const range = quill.getSelection();
-      if (range && range.length === 0) {
-        const val = sizeInput.value;
-        if (val && val > 0) {
-          quill.format('size', val + 'px');
-        }
-      }
-    });
-
     quill.on('selection-change', (range) => {
       if (range) {
-        if (range.length > 0) {
-          const format = quill.getFormat(range);
-          if (format.size) {
-            sizeInput.value = format.size.replace('px', '');
-          }
+        const format = quill.getFormat(range);
+        if (format.size) {
+          sizeInput.value = format.size.replace('px', '');
         } else {
-          const val = sizeInput.value;
-          if (val && val > 0) {
-            quill.format('size', val + 'px');
-          }
+          sizeInput.value = '16';
         }
       }
     });
