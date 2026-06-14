@@ -74,10 +74,19 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric'
 });
+
+const seoDescription = work.synopsis 
+  ? (work.synopsis.length > 150 ? work.synopsis.substring(0, 147) + '...' : work.synopsis)
+  : "Baca selengkapnya karya ini di platform arsip digital Marchive.";
 ---
 
 
-<Layout>
+<Layout 
+  title={`${work.title} | MARCHIVE`}
+  description={seoDescription}
+  image={work.cover || undefined}
+  type="article"
+>
   <main class="pt-[150px] pb-[150px] container">
     <script>
       document.getElementById('back-btn')?.addEventListener('click', (e) => {

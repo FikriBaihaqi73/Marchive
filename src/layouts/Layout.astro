@@ -4,7 +4,24 @@ import Footer from '@components/Footer.astro';
 import Preloader from '@components/Preloader.astro';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title = "MARCHIVE | Digital Archive",
+  description = "Marchive adalah platform arsip karya sastra digital oleh Muhammad Fikri Baihaqi.",
+  image = "/favicon.svg", // Replace with a default OG image if available
+  type = "website"
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).toString();
 ---
+
 
 <!doctype html>
 <html lang="en">
@@ -17,7 +34,27 @@ import '../styles/global.css';
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-		<title>MARCHIVE | Digital Archive</title>
+		
+		<!-- SEO Meta Tags -->
+		<title>{title}</title>
+		<meta name="title" content={title} />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+
+		<!-- OpenGraph Meta Tags -->
+		<meta property="og:type" content={type} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={new URL(image, Astro.url.origin).toString()} />
+
+		<!-- Twitter Meta Tags -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={canonicalURL} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={new URL(image, Astro.url.origin).toString()} />
+
 		<ClientRouter />
 	</head>
 	<body>

@@ -87,10 +87,18 @@ const [nextChapter] = await db
   )
   .orderBy(asc(chaptersTable.order))
   .limit(1);
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '');
+const plainText = stripHtml(chapter.content);
+const seoDescription = plainText.length > 150 ? plainText.substring(0, 147) + '...' : plainText;
 ---
 
 
-<Layout title={`${work.title} - ${chapter.title}`}>
+<Layout 
+  title={`${chapter.title} - ${work.title} | MARCHIVE`}
+  description={seoDescription}
+  type="article"
+>
   {/* Local Overrides to hide global elements for focus mode */}
   <style is:global>
     nav:not(.minimal-nav), footer { display: none !important; }
