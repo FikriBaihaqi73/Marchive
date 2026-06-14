@@ -3,8 +3,42 @@ import Layout from '../../layouts/Layout.astro';
 import { db } from '../../db';
 import { works as worksTable, categories as categoryTable, chapters as chaptersTable } from '../../db/schema';
 import { eq, asc } from 'drizzle-orm';
+import { comments as commentsTable } from '../../db/schema/comments';
+import CommentsSection from '../../components/CommentsSection.astro';
+import { verifyToken } from '../../lib/auth';
 
 const { id } = Astro.params;
+const parsedId = parseInt(id || '0');
+
+// Handle comment submission
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const name = data.get('name')?.toString();
+    const content = data.get('content')?.toString();
+    const parentIdStr = data.get('parentId')?.toString();
+    const parentId = parentIdStr ? parseInt(parentIdStr) : null;
+
+    let isAdmin = false;
+    const token = Astro.cookies.get('marchive_auth_token')?.value;
+    if (token) {
+      const payload = await verifyToken(token);
+      if (payload) isAdmin = true;
+    }
+
+    if (name && content) {
+      await db.insert(commentsTable).values({
+        workId: parsedId,
+        parentId: parentId,
+        isAdmin: isAdmin,
+        name,
+        content
+      });
+    }
+  } catch (error) {
+    console.error('Failed to post comment:', error);
+  }
+}
 
 // 1. Fetch work details joined with category
 const [work] = await db
@@ -119,6 +153,11 @@ const formattedDate = new Date(work.createdAt).toLocaleDateString('en-US', {
             {work.categoryName === 'Puisi' && <div class="w-10 h-[1px] bg-accent mt-[60px]"></div>}
           </div>
         )}
+
+        {/* Comments Section */}
+        <div class="mt-20">
+          <CommentsSection workId={work.id} />
+        </div>
       </div>
     </div>
   </main>

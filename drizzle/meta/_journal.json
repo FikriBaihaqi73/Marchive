@@ -15,6 +15,20 @@
       "when": 1777130165662,
       "tag": "0001_rich_the_spike",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781446233183,
+      "tag": "0002_right_mindworm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781446660949,
+      "tag": "0003_bumpy_white_queen",
+      "breakpoints": true
     }
   ]
 }

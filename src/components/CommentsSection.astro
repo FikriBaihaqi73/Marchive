@@ -1,0 +1,153 @@
+---
+import { db } from '../db';
+import { comments } from '../db/schema/comments';
+import { eq, and, isNull, asc } from 'drizzle-orm';
+
+export interface Props {
+  workId: number;
+  chapterId?: number;
+}
+
+const { workId, chapterId } = Astro.props;
+
+// Fetch comments
+let rawComments = [];
+if (chapterId) {
+  rawComments = await db.select().from(comments).where(eq(comments.chapterId, chapterId)).orderBy(asc(comments.createdAt));
+} else {
+  // If it's a work-level comment, we make sure chapterId is null
+  rawComments = await db.select().from(comments).where(
+    and(
+      eq(comments.workId, workId),
+      isNull(comments.chapterId)
+    )
+  ).orderBy(asc(comments.createdAt));
+}
+
+const parentComments = rawComments.filter(c => !c.parentId);
+const replies = rawComments.filter(c => c.parentId);
+
+const commentsTree = parentComments.map(parent => ({
+  ...parent,
+  replies: replies.filter(r => r.parentId === parent.id)
+}));
+---
+
+<section class="mt-12 pt-8 border-t border-gray-800/50">
+  <h3 class="text-2xl font-bold mb-6 text-gray-100">Komentar</h3>
+
+  {/* Main Form */}
+  <form method="POST" class="mb-10 bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+    <div class="mb-4">
+      <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Nama</label>
+      <input
+        type="text"
+        name="name"
+        id="name"
+        required
+        placeholder="Nama kamu..."
+        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-500/50 focus:border-accent-500 transition-colors"
+      />
+    </div>
+    <div class="mb-6">
+      <label for="content" class="block text-sm font-medium text-gray-300 mb-2">Komentar</label>
+      <textarea
+        name="content"
+        id="content"
+        required
+        rows="4"
+        placeholder="Tulis komentarmu di sini..."
+        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-500/50 focus:border-accent-500 transition-colors resize-y"
+      ></textarea>
+    </div>
+    <button
+      type="submit"
+      class="bg-white text-black font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-200 transition-colors"
+    >
+      Kirim Komentar
+    </button>
+  </form>
+
+  {/* Comments List */}
+  <div class="space-y-6">
+    {commentsTree.length === 0 ? (
+      <p class="text-gray-500 text-center py-8">Belum ada komentar. Jadilah yang pertama!</p>
+    ) : (
+      commentsTree.map((comment) => (
+        <div class="bg-gray-800/30 p-5 rounded-lg border border-gray-800/50">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <h4 class="font-semibold text-gray-200">{comment.name}</h4>
+              {comment.isAdmin && <span class="text-[0.6rem] bg-accent/20 text-accent px-2 py-0.5 rounded-full border border-accent/30 font-bold uppercase tracking-wider">Admin</span>}
+            </div>
+            <span class="text-xs text-gray-500">
+              {new Date(comment.createdAt).toLocaleDateString('id-ID', {
+                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+              })}
+            </span>
+          </div>
+          <p class="text-gray-400 text-sm whitespace-pre-wrap mb-4">{comment.content}</p>
+          
+          <button type="button" class="reply-toggle-btn text-xs text-accent opacity-70 hover:opacity-100 font-medium uppercase tracking-wider mb-4" data-id={comment.id}>
+            Balas
+          </button>
+
+          {/* Reply Form (Hidden by default) */}
+          <form method="POST" class="reply-form hidden mb-6 pl-4 border-l-2 border-gray-700" id={`reply-form-${comment.id}`}>
+            <input type="hidden" name="parentId" value={comment.id} />
+            <div class="mb-3">
+              <input type="text" name="name" required placeholder="Nama kamu..." class="w-full bg-gray-900 border border-gray-800 rounded-md px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-500/50" />
+            </div>
+            <div class="mb-3">
+              <textarea name="content" required rows="2" placeholder="Balasanmu..." class="w-full bg-gray-900 border border-gray-800 rounded-md px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-500/50 resize-y"></textarea>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" class="bg-accent/10 text-accent border border-accent/20 text-xs font-semibold px-4 py-1.5 rounded-md hover:bg-accent hover:text-black transition-colors">Kirim</button>
+              <button type="button" class="cancel-reply-btn bg-transparent text-gray-500 text-xs px-4 py-1.5 hover:text-gray-300" data-id={comment.id}>Batal</button>
+            </div>
+          </form>
+
+          {/* Replies */}
+          {comment.replies.length > 0 && (
+            <div class="pl-4 lg:pl-8 border-l-2 border-gray-800/50 space-y-4 mt-2">
+              {comment.replies.map(reply => (
+                <div class="pt-2">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h5 class="font-medium text-sm text-gray-300">{reply.name}</h5>
+                    {reply.isAdmin && <span class="text-[0.55rem] bg-accent/20 text-accent px-1.5 py-0.5 rounded-full border border-accent/30 font-bold uppercase tracking-wider">Admin</span>}
+                    <span class="text-[0.65rem] text-gray-600 ml-auto">
+                      {new Date(reply.createdAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <p class="text-gray-400 text-sm">{reply.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))
+    )}
+  </div>
+</section>
+
+<script>
+  // Script for toggling reply forms
+  document.querySelectorAll('.reply-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.currentTarget as HTMLElement).dataset.id;
+      document.getElementById(`reply-form-${id}`)?.classList.remove('hidden');
+      (e.currentTarget as HTMLElement).classList.add('hidden');
+    });
+  });
+
+  document.querySelectorAll('.cancel-reply-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = (e.currentTarget as HTMLElement).dataset.id;
+      document.getElementById(`reply-form-${id}`)?.classList.add('hidden');
+      const toggleBtn = document.querySelector(`.reply-toggle-btn[data-id="${id}"]`);
+      if (toggleBtn) {
+        toggleBtn.classList.remove('hidden');
+      }
+    });
+  });
+</script>

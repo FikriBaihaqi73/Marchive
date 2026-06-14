@@ -3,9 +3,44 @@ import Layout from '../../../layouts/Layout.astro';
 import { db } from '../../../db';
 import { works as worksTable, chapters as chaptersTable } from '../../../db/schema';
 import { eq, and, asc, desc, lt, gt } from 'drizzle-orm';
+import { comments as commentsTable } from '../../../db/schema/comments';
+import CommentsSection from '../../../components/CommentsSection.astro';
+import { verifyToken } from '../../../lib/auth';
 
 const { id, chapterId } = Astro.params;
 const workId = parseInt(id || '0');
+const parsedChapterId = parseInt(chapterId || '0');
+
+// Handle comment submission
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const name = data.get('name')?.toString();
+    const content = data.get('content')?.toString();
+    const parentIdStr = data.get('parentId')?.toString();
+    const parentId = parentIdStr ? parseInt(parentIdStr) : null;
+
+    let isAdmin = false;
+    const token = Astro.cookies.get('marchive_auth_token')?.value;
+    if (token) {
+      const payload = await verifyToken(token);
+      if (payload) isAdmin = true;
+    }
+
+    if (name && content) {
+      await db.insert(commentsTable).values({
+        workId: workId,
+        chapterId: parsedChapterId,
+        parentId: parentId,
+        isAdmin: isAdmin,
+        name,
+        content
+      });
+    }
+  } catch (error) {
+    console.error('Failed to post comment:', error);
+  }
+}
 
 // 1. Fetch current chapter
 const [chapter] = await db
@@ -114,6 +149,11 @@ const [nextChapter] = await db
           
           <div class="mt-[100px] flex justify-center text-[0.8rem] opacity-30">
             {prevChapter && <a href={`/works/${work.id}/${prevChapter.id}`} class="text-accent no-underline hover:underline">&larr; Previous Chapter</a>}
+          </div>
+
+          {/* Comments Section */}
+          <div class="mt-20">
+            <CommentsSection workId={work.id} chapterId={chapter.id} />
           </div>
         </section>
       </article>

@@ -46,6 +46,9 @@ const { title, activePage } = Astro.props;
         <a href="/admin/categories" class={`flex items-center gap-3 p-[12px_15px] rounded-lg text-white text-[0.85rem] no-underline transition-all duration-300 opacity-70 hover:bg-accent/10 hover:text-accent hover:opacity-100 ${activePage === 'categories' ? 'bg-accent/10 text-accent opacity-100' : ''}`}>
           <span>Categories</span>
         </a>
+        <a href="/admin/comments" class={`flex items-center gap-3 p-[12px_15px] rounded-lg text-white text-[0.85rem] no-underline transition-all duration-300 opacity-70 hover:bg-accent/10 hover:text-accent hover:opacity-100 ${activePage === 'comments' ? 'bg-accent/10 text-accent opacity-100' : ''}`}>
+          <span>Comments</span>
+        </a>
         
         <div class="text-[0.65rem] tracking-[0.2em] opacity-40 mt-5 mb-2.5 ml-2.5 uppercase">System</div>
         <a href="/admin/settings" class="flex items-center gap-3 p-[12px_15px] rounded-lg text-white text-[0.85rem] no-underline transition-all duration-300 opacity-70 hover:bg-accent/10 hover:text-accent hover:opacity-100">

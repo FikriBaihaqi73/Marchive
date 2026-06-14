@@ -1,0 +1,83 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { db } from '../../../db';
+import { comments } from '../../../db/schema/comments';
+import { works } from '../../../db/schema/works';
+import { eq, desc } from 'drizzle-orm';
+
+// Handle Delete Comment
+if (Astro.request.method === 'POST') {
+  const data = await Astro.request.formData();
+  const deleteId = data.get('deleteId');
+  if (deleteId) {
+    await db.delete(comments).where(eq(comments.id, parseInt(deleteId.toString())));
+  }
+}
+
+// Fetch all comments with work titles
+const allComments = await db
+  .select({
+    id: comments.id,
+    name: comments.name,
+    content: comments.content,
+    createdAt: comments.createdAt,
+    isAdmin: comments.isAdmin,
+    workTitle: works.title,
+  })
+  .from(comments)
+  .leftJoin(works, eq(comments.workId, works.id))
+  .orderBy(desc(comments.createdAt));
+---
+
+<AdminLayout title="Manage Comments" activePage="comments">
+  <section class="bg-white/5 border border-glass-border rounded-xl p-6 lg:p-10">
+    <h2 class="text-xl font-bold mb-6">Recent Comments</h2>
+
+    {allComments.length === 0 ? (
+      <p class="text-gray-500 italic">No comments available.</p>
+    ) : (
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-gray-800">
+              <th class="py-4 px-4 font-semibold text-gray-400">User</th>
+              <th class="py-4 px-4 font-semibold text-gray-400">Content</th>
+              <th class="py-4 px-4 font-semibold text-gray-400">Work/Target</th>
+              <th class="py-4 px-4 font-semibold text-gray-400">Date</th>
+              <th class="py-4 px-4 font-semibold text-gray-400 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800/50">
+            {allComments.map(comment => (
+              <tr class="hover:bg-white/[0.02] transition-colors">
+                <td class="py-4 px-4">
+                  <div class="font-medium text-gray-200">
+                    {comment.name}
+                    {comment.isAdmin && <span class="ml-2 text-[0.6rem] bg-accent/20 text-accent px-2 py-0.5 rounded-full border border-accent/30 font-bold uppercase tracking-wider">Admin</span>}
+                  </div>
+                </td>
+                <td class="py-4 px-4">
+                  <p class="text-sm text-gray-400 max-w-xs truncate" title={comment.content}>{comment.content}</p>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="text-sm text-gray-400">{comment.workTitle || 'Unknown'}</span>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="text-sm text-gray-500">
+                    {new Date(comment.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-right">
+                  <form method="POST" onsubmit="return confirm('Are you sure you want to delete this comment?');">
+                    <input type="hidden" name="deleteId" value={comment.id} />
+                    <button type="submit" class="text-red-500 hover:text-red-400 text-sm font-medium transition-colors">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+</AdminLayout>
